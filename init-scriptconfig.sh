@@ -45,10 +45,27 @@ show_ssh_port() {
     echo "El puerto activo para SSH es: $ssh_port"
 }
 
-# Función para mostrar la configuración de Chrony
-show_chrony_config() {
-    echo "Configuración de Chrony"
-    cat /etc/chrony.conf
+# Función para configurar el origen horario (NTP)
+configure_ntp() {
+    echo "Configuración de NTP"
+    read -p "¿Cuántos servidores NTP deseas registrar? " num_ntp_servers
+
+    # Verificar que el número de servidores NTP sea válido
+    if [[ ! $num_ntp_servers =~ ^[1-9][0-9]*$ ]]; then
+        echo "Número de servidores NTP no válido. Debe ser un número entero mayor que cero."
+        return
+    fi
+
+    # Limpiar el archivo chrony.conf de configuraciones anteriores
+    sed -i '/pool /d' /etc/chrony.conf
+
+    # Solicitar las direcciones IP de los servidores NTP
+    for ((i=1; i<=$num_ntp_servers; i++)); do
+        read -p "Introduce la dirección IP del servidor NTP $i: " ntp_ip
+        echo "pool $ntp_ip iburst" >> /etc/chrony.conf
+    done
+
+    echo "Configuración de NTP completada."
 }
 
 # Función para registrar el sistema en Red Hat

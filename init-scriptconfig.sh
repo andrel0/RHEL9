@@ -93,7 +93,6 @@ show_chrony_config() {
 register_redhat_system() {
 echo "Registrando el sistema en Red Hat..."
     subscription-manager register --auto-attach
-    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 
     # Verificación del resultado del comando
     if [ $? -eq 0 ]; then

@@ -123,6 +123,25 @@ echo "Registrando el sistema en Red Hat..."
     read -n 1 -rsp "Presiona cualquier tecla para volver al menú..."
 }
 
+# Función para actualizar el sistema operativo
+update_system() {
+    echo "Ejecutando la actualización del sistema operativo..."
+    
+    # Ejecutar la actualización y capturar la salida en una variable
+    update_output=$(yum update -y 2>&1)
+
+    # Verificar el código de salida
+    if [ $? -eq 0 ]; then
+        echo "La actualización del sistema operativo se completó correctamente."
+        echo "Paquetes instalados/actualizados:"
+        echo "$update_output"
+    else
+        echo "Error durante la actualización del sistema operativo. Consulta los logs para obtener más detalles."
+    fi
+
+    read -n 1 -rsp "Presiona cualquier tecla para volver al menú..."
+}
+
 # Menú principal
 while true; do
     clear

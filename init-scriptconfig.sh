@@ -1,17 +1,3 @@
-Script de ejecución inicial de configuración Sistema Operativo RHEL
-Menú de configuración
-1. Configurar red
-2. Configurar hostname
-3. Configurar DNS
-4. Configurar NTP
-5. Mostrar puerto SSH
-6. Mostrar configuración de Chrony
-7. Registrar sistema en Red Hat
-8. Actualizar sistema operativo
-9. Salir
-Selecciona una opción: 9
-[root@rhel9 ~]# vi initialConfig.sh
-[root@rhel9 ~]# cat initialConfig.sh
 #!/bin/bash
 
 # Función para configurar la red

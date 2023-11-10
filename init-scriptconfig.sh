@@ -106,11 +106,38 @@ show_chrony_config() {
 # Función para registrar el sistema en Red Hat
 register_redhat_system() {
     subscription-manager register
-}
-
+    
 # Función para actualizar el sistema operativo
-update_system() {
-    yum update -y
+echo "Registrando el sistema en Red Hat..."
+    subscription-manager register --auto-attach
+
+    # Verificación del resultado del comando
+    if [ $? -eq 0 ]; then
+        echo "El sistema se registró correctamente en Red Hat."
+    else
+        echo "Error al intentar registrar el sistema en Red Hat. Por favor, verifique las credenciales."
+        read -rp "Ingrese su nombre de usuario de Red Hat: " username
+        read -rsp "Ingrese su clave de validación de Red Hat: " password
+        echo
+
+        # Intentar registrar nuevamente con las credenciales proporcionadas
+        subscription-manager register --username="$username" --password="$password" --auto-attach
+
+        # Verificar el resultado nuevamente
+        if [ $? -eq 0 ]; then
+            echo "El sistema se registró correctamente en Red Hat con las nuevas credenciales."
+        else
+            echo "Error al intentar registrar el sistema en Red Hat incluso con las nuevas credenciales. Consulte la documentación."
+            # Puedes agregar más acciones aquí según sea necesario.
+        fi
+    fi
+
+    # Mostrar información del sistema
+    echo "Mostrando información del sistema:"
+    subscription-manager list --installed
+
+    # Aguardar que el usuario presione una tecla para continuar
+    read -n 1 -rsp "Presiona cualquier tecla para volver al menú..."
 }
 
 # Menú principal

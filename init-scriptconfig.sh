@@ -10,7 +10,18 @@ configure_network() {
     # Configuración de la interfaz de red
     nmcli connection modify ens192 ipv4.address $ip_address/$netmask ipv4.gateway $gateway
     nmcli connection up ens192
-    echo "Configuración de red completada."
+
+    # Reiniciar la interfaz de red
+    nmcli connection down ens192
+    nmcli connection up ens192
+
+    # Mostrar información configurada
+    echo "Configuración de red completada:"
+    echo "Dirección IP: $ip_address"
+    echo "Máscara de red: $netmask"
+    echo "Puerta de enlace (gateway): $gateway"
+
+    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para configurar el hostname
@@ -39,12 +50,6 @@ configure_dns() {
     echo "DNS configurado correctamente."
 }
 
-# Función para mostrar el puerto SSH
-show_ssh_port() {
-    ssh_port=$(ss -tlnp | grep ssh | awk '{print $4}' | cut -d ':' -f 2)
-    echo "El puerto activo para SSH es: $ssh_port"
-}
-
 # Función para configurar el origen horario (NTP)
 configure_ntp() {
     echo "Configuración de NTP"
@@ -68,6 +73,18 @@ configure_ntp() {
     echo "Configuración de NTP completada."
 }
 
+# Función para mostrar el puerto SSH
+show_ssh_port() {
+    ssh_port=$(ss -tlnp | grep ssh | awk '{print $4}' | cut -d ':' -f 2)
+    echo "El puerto activo para SSH es: $ssh_port"
+}
+
+# Función para mostrar la configuración de Chrony
+show_chrony_config() {
+    echo "Configuración de Chrony"
+    cat /etc/chrony.conf
+}
+
 # Función para registrar el sistema en Red Hat
 register_redhat_system() {
     subscription-manager register
@@ -86,11 +103,12 @@ while true; do
     echo "1. Configurar red"
     echo "2. Configurar hostname"
     echo "3. Configurar DNS"
-    echo "4. Mostrar puerto SSH"
-    echo "5. Mostrar configuración de Chrony"
-    echo "6. Registrar sistema en Red Hat"
-    echo "7. Actualizar sistema operativo"
-    echo "8. Salir"
+    echo "4. Configurar NTP"
+    echo "5. Mostrar puerto SSH"
+    echo "6. Mostrar configuración de Chrony"
+    echo "7. Registrar sistema en Red Hat"
+    echo "8. Actualizar sistema operativo"
+    echo "9. Salir"
 
     read -p "Selecciona una opción: " choice
 
@@ -98,11 +116,12 @@ while true; do
         1) configure_network ;;
         2) configure_hostname ;;
         3) configure_dns ;;
-        4) show_ssh_port ;;
-        5) show_chrony_config ;;
-        6) register_redhat_system ;;
-        7) update_system ;;
-        8) exit ;;
+        4) configure_ntp ;;
+        5) show_ssh_port ;;
+        6) show_chrony_config ;;
+        7) register_redhat_system ;;
+        8) update_system ;;
+        9) exit ;;
         *) echo "Opción no válida. Inténtalo de nuevo." ;;
     esac
 done

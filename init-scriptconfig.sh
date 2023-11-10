@@ -1,14 +1,28 @@
+Script de ejecución inicial de configuración Sistema Operativo RHEL
+Menú de configuración
+1. Configurar red
+2. Configurar hostname
+3. Configurar DNS
+4. Configurar NTP
+5. Mostrar puerto SSH
+6. Mostrar configuración de Chrony
+7. Registrar sistema en Red Hat
+8. Actualizar sistema operativo
+9. Salir
+Selecciona una opción: 9
+[root@rhel9 ~]# vi initialConfig.sh
+[root@rhel9 ~]# cat initialConfig.sh
 #!/bin/bash
 
 # Función para configurar la red
 configure_network() {
     echo "Configuración de red"
     read -p "Introduce la dirección IP: " ip_address
-    read -p "Introduce la máscara de red: " netmask
+    read -p "Introduce la máscara de red (indicando prefijo ejemplo /24): " netmask
     read -p "Introduce la puerta de enlace (gateway): " gateway
 
     # Configuración de la interfaz de red
-    nmcli connection modify ens192 ipv4.address $ip_address/$netmask ipv4.gateway $gateway
+    nmcli connection modify ens192 ipv4.address $ip_address$netmask ipv4.gateway $gateway
     nmcli connection up ens192
 
     # Reiniciar la interfaz de red
@@ -20,7 +34,6 @@ configure_network() {
     echo "Dirección IP: $ip_address"
     echo "Máscara de red: $netmask"
     echo "Puerta de enlace (gateway): $gateway"
-
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
@@ -31,6 +44,7 @@ configure_hostname() {
 
     hostnamectl set-hostname $new_hostname
     echo "Hostname configurado correctamente."
+    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para configurar el DNS
@@ -48,6 +62,7 @@ configure_dns() {
     nmcli connection up ens192
 
     echo "DNS configurado correctamente."
+    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para configurar el origen horario (NTP)
@@ -69,20 +84,23 @@ configure_ntp() {
         read -p "Introduce la dirección IP del servidor NTP $i: " ntp_ip
         echo "pool $ntp_ip iburst" >> /etc/chrony.conf
     done
-
+    systemctl restart chronyd.service
     echo "Configuración de NTP completada."
+    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para mostrar el puerto SSH
 show_ssh_port() {
     ssh_port=$(ss -tlnp | grep ssh | awk '{print $4}' | cut -d ':' -f 2)
     echo "El puerto activo para SSH es: $ssh_port"
+    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para mostrar la configuración de Chrony
 show_chrony_config() {
     echo "Configuración de Chrony"
-    cat /etc/chrony.conf
+    grep -v '^#' /etc/chrony.conf
+    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para registrar el sistema en Red Hat

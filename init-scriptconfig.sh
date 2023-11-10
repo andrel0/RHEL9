@@ -104,7 +104,7 @@ echo "Registrando el sistema en Red Hat..."
         echo
 
         # Intentar registrar nuevamente con las credenciales proporcionadas
-        subscription-manager register --username="$username" --password="$password" --auto-attach
+        subscription-manager register --username="$username" --password="$password" --auto-attach --force
 
         # Verificar el resultado nuevamente
         if [ $? -eq 0 ]; then

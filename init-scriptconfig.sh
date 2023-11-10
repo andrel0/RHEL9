@@ -8,16 +8,8 @@ configure_network() {
     read -p "Introduce la puerta de enlace (gateway): " gateway
 
     # Configuración de la interfaz de red
-    cat <<EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
-DEVICE=eth0
-BOOTPROTO=none
-ONBOOT=yes
-IPADDR=$ip_address
-NETMASK=$netmask
-GATEWAY=$gateway
-EOF
-
-    systemctl restart network
+    nmcli connection modify ens192 ipv4.address $ip_address/$netmask ipv4.gateway $gateway
+    nmcli connection up ens192
     echo "Configuración de red completada."
 }
 

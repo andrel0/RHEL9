@@ -25,10 +25,17 @@ configure_hostname() {
 # Función para configurar el DNS
 configure_dns() {
     echo "Configuración de DNS"
-    read -p "Introduce la dirección del servidor DNS: " dns_server
+    read -p "Introduce el primer servidor DNS: " dns_server1
+    read -p "Introduce el segundo servidor DNS: " dns_server2
 
     # Configuración del archivo resolv.conf
-    echo "nameserver $dns_server" > /etc/resolv.conf
+    echo "nameserver $dns_server1" > /etc/resolv.conf
+    echo "nameserver $dns_server2" >> /etc/resolv.conf
+
+    # Configuración de la interfaz de red
+    nmcli connection modify ens192 ipv4.dns "$dns_server1 $dns_server2"
+    nmcli connection up ens192
+
     echo "DNS configurado correctamente."
 }
 

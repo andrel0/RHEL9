@@ -123,27 +123,27 @@ echo "Registrando el sistema en Red Hat..."
     read -n 1 -rsp "Presiona cualquier tecla para volver al menú..."
 }
 
-# Función para actualizar el sistema operativo
+# Función para actualizar el sistema operativo con dnf
 update_system() {
-    echo "Ejecutando la actualización del sistema operativo..."
+    echo "Ejecutando la actualización del sistema operativo con dnf..."
 
     # Crear un archivo temporal para almacenar la salida
-    temp_output=$(mktemp /tmp/yum_update_output.XXXXXX)
+    temp_output=$(mktemp /tmp/dnf_update_output.XXXXXX)
 
-    # Ejecutar la actualización y redirigir la salida y error estándar al archivo temporal
-    yum update -y > >(tee "$temp_output") 2>&1 &
+    # Ejecutar la actualización sin intervención del usuario y redirigir la salida y error estándar al archivo temporal
+    dnf update -y > "$temp_output" 2>&1 &
 
     # Obtener el PID del proceso en segundo plano
-    yum_pid=$!
+    dnf_pid=$!
 
     # Mostrar el progreso
-    while kill -0 $yum_pid 2>/dev/null; do
+    while kill -0 $dnf_pid 2>/dev/null; do
         echo -n "."
         sleep 5
     done
 
     # Verificar el código de salida
-    wait $yum_pid
+    wait $dnf_pid
     if [ $? -eq 0 ]; then
         echo -e "\nLa actualización del sistema operativo se completó correctamente."
         echo -e "Paquetes instalados/actualizados:"

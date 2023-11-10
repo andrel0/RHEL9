@@ -105,11 +105,9 @@ show_chrony_config() {
 
 # Función para registrar el sistema en Red Hat
 register_redhat_system() {
-    subscription-manager register
-    
-# Función para actualizar el sistema operativo
 echo "Registrando el sistema en Red Hat..."
     subscription-manager register --auto-attach
+    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 
     # Verificación del resultado del comando
     if [ $? -eq 0 ]; then

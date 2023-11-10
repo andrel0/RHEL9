@@ -52,6 +52,16 @@ show_chrony_config() {
     cat /etc/chrony.conf
 }
 
+# Función para registrar el sistema en Red Hat
+register_redhat_system() {
+    subscription-manager register
+}
+
+# Función para actualizar el sistema operativo
+update_system() {
+    yum update -y
+}
+
 # Menú principal
 while true; do
     clear
@@ -62,7 +72,9 @@ while true; do
     echo "3. Configurar DNS"
     echo "4. Mostrar puerto SSH"
     echo "5. Mostrar configuración de Chrony"
-    echo "6. Salir"
+    echo "6. Registrar sistema en Red Hat"
+    echo "7. Actualizar sistema operativo"
+    echo "8. Salir"
 
     read -p "Selecciona una opción: " choice
 
@@ -72,7 +84,9 @@ while true; do
         3) configure_dns ;;
         4) show_ssh_port ;;
         5) show_chrony_config ;;
-        6) exit ;;
+        6) register_redhat_system ;;
+        7) update_system ;;
+        8) exit ;;
         *) echo "Opción no válida. Inténtalo de nuevo." ;;
     esac
 done

@@ -126,18 +126,34 @@ echo "Registrando el sistema en Red Hat..."
 # Función para actualizar el sistema operativo
 update_system() {
     echo "Ejecutando la actualización del sistema operativo..."
-    
-    # Ejecutar la actualización y capturar la salida en una variable
-    update_output=$(yum update -y 2>&1)
+
+    # Crear un archivo temporal para almacenar la salida
+    temp_output=$(mktemp /tmp/yum_update_output.XXXXXX)
+
+    # Ejecutar la actualización y redirigir la salida y error estándar al archivo temporal
+    yum update -y > >(tee "$temp_output") 2>&1 &
+
+    # Obtener el PID del proceso en segundo plano
+    yum_pid=$!
+
+    # Mostrar el progreso
+    while kill -0 $yum_pid 2>/dev/null; do
+        echo -n "."
+        sleep 5
+    done
 
     # Verificar el código de salida
+    wait $yum_pid
     if [ $? -eq 0 ]; then
-        echo "La actualización del sistema operativo se completó correctamente."
-        echo "Paquetes instalados/actualizados:"
-        echo "$update_output"
+        echo -e "\nLa actualización del sistema operativo se completó correctamente."
+        echo -e "Paquetes instalados/actualizados:"
+        cat "$temp_output"
     else
-        echo "Error durante la actualización del sistema operativo. Consulta los logs para obtener más detalles."
+        echo -e "\nError durante la actualización del sistema operativo. Consulta los logs para obtener más detalles."
     fi
+
+    # Eliminar el archivo temporal
+    rm -f "$temp_output"
 
     read -n 1 -rsp "Presiona cualquier tecla para volver al menú..."
 }

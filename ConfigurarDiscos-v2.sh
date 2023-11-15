@@ -23,17 +23,31 @@ actualizar_discos() {
 
 listar_particiones_expansibles() {
     limpiar_pantalla
-    echo -e "Particiones LVM que pueden expandirse:"
-    particiones_expansibles=($(lvdisplay | awk '/LV Path/ {path=$3} /LV Size/ {size=$3} /Allocatable/ {if ($2=="yes") print path, size}' | cut -d' ' -f1))
+    echo -e "Particiones LVM (Logical Volumes y Volume Groups) que pueden expandirse:"
 
-    if [ ${#particiones_expansibles[@]} -eq 0 ]; then
-        echo "No hay particiones LVM disponibles para expandirse."
-        return
+    # Obtener todos los LV y VG disponibles
+    lv_list=($(lvdisplay | awk '/LV Path/ {print $3}'))
+    vg_list=($(vgdisplay | awk '/VG Name/ {print $3}'))
+
+    # Imprimir la lista de LV
+    if [ ${#lv_list[@]} -gt 0 ]; then
+        echo -e "\nLogical Volumes:"
+        for lv in "${lv_list[@]}"; do
+            echo "- $lv"
+        done
     fi
 
-    for ((i=0; i<${#particiones_expansibles[@]}; i++)); do
-        echo "$((i+1)). ${particiones_expansibles[i]}"
-    done
+    # Imprimir la lista de VG
+    if [ ${#vg_list[@]} -gt 0 ]; then
+        echo -e "\nVolume Groups:"
+        for vg in "${vg_list[@]}"; do
+            echo "- $vg"
+        done
+    fi
+
+    if [ ${#lv_list[@]} -eq 0 ] && [ ${#vg_list[@]} -eq 0 ]; then
+        echo "No hay Logical Volumes ni Volume Groups disponibles para expandirse."
+    fi
 }
 
 expandir_particion() {

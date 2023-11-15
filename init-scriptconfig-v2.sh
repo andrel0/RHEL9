@@ -13,15 +13,12 @@ configure_network() {
     read -p "Introduce la máscara de red (indicando prefijo ejemplo /24): " netmask
     read -p "Introduce la puerta de enlace (gateway): " gateway
 
-    # Configuración de la interfaz de red
     nmcli connection modify ens192 ipv4.address $ip_address$netmask ipv4.gateway $gateway
     nmcli connection up ens192
 
-    # Reiniciar la interfaz de red
     nmcli connection down ens192
     nmcli connection up ens192
 
-    # Mostrar información configurada
     echo "Configuración de red completada:"
     echo "Dirección IP: $ip_address"
     echo "Máscara de red: $netmask"
@@ -45,11 +42,9 @@ configure_dns() {
     read -p "Introduce el primer servidor DNS: " dns_server1
     read -p "Introduce el segundo servidor DNS: " dns_server2
 
-    # Configuración del archivo resolv.conf
     echo "nameserver $dns_server1" > /etc/resolv.conf
     echo "nameserver $dns_server2" >> /etc/resolv.conf
 
-    # Configuración de la interfaz de red
     nmcli connection modify ens192 ipv4.dns "$dns_server1 $dns_server2"
     nmcli connection up ens192
 
@@ -62,25 +57,20 @@ configure_ntp() {
     echo "Configuración de NTP"
     read -p "¿Cuántos servidores NTP deseas registrar? " num_ntp_servers
 
-    # Verificar que el número de servidores NTP sea válido
     if [[ ! $num_ntp_servers =~ ^[1-9][0-9]*$ ]]; then
         echo "Número de servidores NTP no válido. Debe ser un número entero mayor que cero."
         return
     fi
 
-    # Limpiar el archivo chrony.conf de configuraciones anteriores
     sed -i '/pool /d' /etc/chrony.conf
 
-    # Solicitar las direcciones IP de los servidores NTP
     for ((i=1; i<=$num_ntp_servers; i++)); do
         read -p "Introduce la dirección IP del servidor NTP $i: " ntp_ip
         echo "pool $ntp_ip iburst" >> /etc/chrony.conf
     done
 
-    # Reiniciar el servicio Chrony
     systemctl restart chronyd.service
 
-    # Validar el resultado del reinicio
     if [ $? -eq 0 ]; then
         echo "Configuración de NTP completada."
     else
@@ -100,14 +90,18 @@ show_ssh_port() {
 # Función para mostrar la configuración de Chrony
 show_chrony_config() {
     echo "Configuración de Chrony"
-    grep -v '^#' /etc/chrony.conf
+    echo -e "${YELLOW}Status del servicio chronyd:${NC}"
+    systemctl is-enabled chronyd
+    systemctl is-active chronyd
+    grep -v '^#\|^$' /etc/chrony.conf
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para mostrar el status de firewalld y reglas creadas
 show_firewalld_status() {
     echo -e "${YELLOW}Mostrando status de firewalld:${NC}"
-    systemctl status firewalld
+    systemctl is-active firewalld
+    systemctl is-enabled firewalld
     echo -e "${YELLOW}Mostrando reglas de firewalld:${NC}"
     firewall-cmd --list-all
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
@@ -115,16 +109,22 @@ show_firewalld_status() {
 
 # Función para mostrar configuración de logs y logrotate
 show_logs_config() {
+    echo -e "${YELLOW}Mostrando status del servicio:${NC}"
+    systemctl is-enabled rsyslog
+    systemctl is-active rsyslog
     echo -e "${YELLOW}Mostrando configuración actual de logs:${NC}"
-    cat /etc/rsyslog.conf
+    grep -v '^#\|^$' /etc/rsyslog.conf
     echo -e "${YELLOW}Mostrando configuración de logrotate:${NC}"
-    cat /etc/logrotate.conf
-    cat /etc/logrotate.d/*
+    grep -v '^#\|^$' /etc/logrotate.conf
+    grep -v '^#\|^$' /etc/logrotate.d/*
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para mostrar configuración de auditd
 show_auditd_config() {
+    echo -e "${YELLOW}Mostrando status servicio auditd:${NC}"
+    systemctl is-enabled auditd
+    systemctl is-active auditd
     echo -e "${YELLOW}Mostrando configuración de auditd:${NC}"
     auditctl -l
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
@@ -133,7 +133,7 @@ show_auditd_config() {
 # Función para mostrar directivas de seguridad de contraseñas
 show_pwquality_config() {
     echo -e "${YELLOW}Mostrando directivas de seguridad de contraseñas:${NC}"
-    grep -v '^#' /etc/security/pwquality.conf
+    grep -v '^#\|^$' /etc/security/pwquality.conf
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
@@ -142,7 +142,6 @@ register_redhat_system() {
     echo "Registrando el sistema en Red Hat..."
     subscription-manager register --auto-attach
 
-    # Verificación del resultado del comando
     if [ $? -eq 0 ]; then
         echo "El sistema se registró correctamente en Red Hat."
     else
@@ -151,23 +150,18 @@ register_redhat_system() {
         read -rsp "Ingrese su clave de validación de Red Hat: " password
         echo
 
-        # Intentar registrar nuevamente con las credenciales proporcionadas
         subscription-manager register --username="$username" --password="$password" --auto-attach --force
 
-        # Verificar el resultado nuevamente
         if [ $? -eq 0 ]; then
             echo "El sistema se registró correctamente en Red Hat con las nuevas credenciales."
         else
             echo "Error al intentar registrar el sistema en Red Hat incluso con las nuevas credenciales. Consulte la documentación."
-            # Puedes agregar más acciones aquí según sea necesario.
         fi
     fi
 
-    # Mostrar información del sistema
     echo "Mostrando información del sistema:"
     subscription-manager list --installed
 
-    # Aguardar que el usuario presione una tecla para continuar
     read -n 1 -rsp "Presiona cualquier tecla para volver al menú..."
 }
 
@@ -175,22 +169,17 @@ register_redhat_system() {
 update_system() {
     echo "Ejecutando la actualización del sistema operativo con dnf..."
 
-    # Crear un archivo temporal para almacenar la salida
     temp_output=$(mktemp /tmp/dnf_update_output.XXXXXX)
 
-    # Ejecutar la actualización sin intervención del usuario y redirigir la salida y error estándar al archivo temporal
     dnf update -y > "$temp_output" 2>&1 &
 
-    # Obtener el PID del proceso en segundo plano
     dnf_pid=$!
 
-    # Mostrar el progreso
     while kill -0 $dnf_pid 2>/dev/null; do
         echo -n "."
         sleep 5
     done
 
-    # Verificar el código de salida
     wait $dnf_pid
     if [ $? -eq 0 ]; then
         echo -e "\nLa actualización del sistema operativo se completó correctamente."
@@ -200,7 +189,6 @@ update_system() {
         echo -e "\nError durante la actualización del sistema operativo. Consulta los logs para obtener más detalles."
     fi
 
-    # Eliminar el archivo temporal
     rm -f "$temp_output"
 
     read -n 1 -rsp "Presiona cualquier tecla para volver al menú..."
@@ -219,12 +207,13 @@ show_menu() {
     echo -e "5. ${YELLOW}Mostrar puerto SSH${NC}"
     echo -e "6. ${YELLOW}Mostrar configuración de Chrony${NC}"
     echo -e "7. ${YELLOW}Mostrar status de firewalld${NC}"
-    echo -e "8. ${YELLOW}Mostrar configuración de logs y logrotate${NC}"
+    echo -e "8. ${YELLOW}Mostrar configuración de logs/logrotate${NC}"
     echo -e "9. ${YELLOW}Mostrar configuración de auditd${NC}"
     echo -e "10. ${YELLOW}Mostrar directivas de seguridad de contraseñas${NC}"
-    echo -e "11. ${YELLOW}Registrar sistema en Red Hat${NC}"
-    echo -e "12. ${YELLOW}Actualizar sistema operativo${NC}"
-    echo -e "13. ${RED}Salir${NC}"
+    echo -e "11. ${YELLOW}Mostrar estado de servicios${NC}"
+    echo -e "12. ${YELLOW}Registrar sistema en Red Hat${NC}"
+    echo -e "13. ${YELLOW}Actualizar sistema operativo${NC}"
+    echo -e "14. ${RED}Salir${NC}"
     echo -e "-----------------------------------------"
     read -p "Selecciona una opción: " choice
 }
@@ -244,9 +233,10 @@ while true; do
         8) show_logs_config ;;
         9) show_auditd_config ;;
         10) show_pwquality_config ;;
-        11) register_redhat_system ;;
-        12) update_system ;;
-        13) exit ;;
+        11) show_services_status ;;
+        12) register_redhat_system ;;
+        13) update_system ;;
+        14) exit ;;
         *) echo -e "${RED}Opción no válida. Inténtalo de nuevo.${NC}" ;;
     esac
 done

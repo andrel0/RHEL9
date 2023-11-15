@@ -133,7 +133,14 @@ show_auditd_config() {
 # Función para mostrar directivas de seguridad de contraseñas
 show_pwquality_config() {
     echo -e "${YELLOW}Mostrando directivas de seguridad de contraseñas:${NC}"
-    grep -v '^#\|^$' /etc/security/pwquality.conf
+    echo -e "Longitud mínima de la contraseña: $(authconfig --test | grep "password.*minlen" | awk -F'=' '{print $2}')"
+    echo -e "Longitud máxima de la contraseña: $(authconfig --test | grep "password.*maxlen" | awk -F'=' '{print $2}')"
+    echo -e "Número mínimo de letras en la contraseña: $(authconfig --test | grep "password.*minclass" | awk -F'=' '{print $2}')"
+    echo -e "Número mínimo de dígitos en la contraseña: $(authconfig --test | grep "password.*mindigit" | awk -F'=' '{print $2}')"
+    echo -e "Número mínimo de caracteres especiales en la contraseña: $(authconfig --test | grep "password.*minclass.*-special" | awk -F'=' '{print $2}')"
+    echo -e "Días antes de que una contraseña pueda ser cambiada: $(authconfig --test | grep "password.*minclass.*-change-days" | awk -F'=' '{print $2}')"
+    echo -e "Días antes de que una contraseña deba ser cambiada: $(authconfig --test | grep "password.*maxrepeat" | awk -F'=' '{print $2}')"
+    echo -e "Días antes de que una contraseña deba ser cambiada después de que expire: $(authconfig --test | grep "password.*maxclassrepeat" | awk -F'=' '{print $2}')"
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 

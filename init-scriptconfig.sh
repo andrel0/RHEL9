@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Definir colores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+# ... (Funciones y código existente)
+
 # Función para configurar la red
 configure_network() {
     echo "Configuración de red"
@@ -51,7 +58,7 @@ configure_dns() {
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
-# Función para configurar el origen horario (NTP)
+# Función para configurar zona horaria (NTP)
 configure_ntp() {
     echo "Configuración de NTP"
     read -p "¿Cuántos servidores NTP deseas registrar? " num_ntp_servers
@@ -70,12 +77,21 @@ configure_ntp() {
         read -p "Introduce la dirección IP del servidor NTP $i: " ntp_ip
         echo "pool $ntp_ip iburst" >> /etc/chrony.conf
     done
+
+    # Reiniciar el servicio Chrony
     systemctl restart chronyd.service
-    echo "Configuración de NTP completada."
+
+    # Validar el resultado del reinicio
+    if [ $? -eq 0 ]; then
+        echo "Configuración de NTP completada."
+    else
+        echo "Error al intentar reiniciar el servicio Chrony. Consulta los logs para obtener más detalles."
+    fi
+
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
-# Función para mostrar el puerto SSH
+# Función para mostrar el puerto SSH configurado
 show_ssh_port() {
     ssh_port=$(ss -tlnp | grep ssh | awk '{print $4}' | cut -d ':' -f 2)
     echo "El puerto activo para SSH es: $ssh_port"
@@ -158,22 +174,28 @@ update_system() {
     read -n 1 -rsp "Presiona cualquier tecla para volver al menú..."
 }
 
+# Función para mostrar el menú principal
+show_menu() {
+    clear
+    echo -e "-----------------------------------------"
+    echo -e "${GREEN}   Script de Configuración RHEL 9${NC}"
+    echo -e "-----------------------------------------"
+    echo -e "1. ${YELLOW}Configurar red${NC}"
+    echo -e "2. ${YELLOW}Configurar hostname${NC}"
+    echo -e "3. ${YELLOW}Configurar DNS${NC}"
+    echo -e "4. ${YELLOW}Configurar NTP${NC}"
+    echo -e "5. ${YELLOW}Mostrar puerto SSH${NC}"
+    echo -e "6. ${YELLOW}Mostrar configuración de Chrony${NC}"
+    echo -e "7. ${YELLOW}Registrar sistema en Red Hat${NC}"
+    echo -e "8. ${YELLOW}Actualizar sistema operativo${NC}"
+    echo -e "9. ${RED}Salir${NC}"
+    echo -e "-----------------------------------------"
+    read -p "Selecciona una opción: " choice
+}
+
 # Menú principal
 while true; do
-    clear
-    echo "Script de ejecución inicial de configuración Sistema Operativo RHEL"
-    echo "Menú de configuración"
-    echo "1. Configurar red"
-    echo "2. Configurar hostname"
-    echo "3. Configurar DNS"
-    echo "4. Configurar NTP"
-    echo "5. Mostrar puerto SSH"
-    echo "6. Mostrar configuración de Chrony"
-    echo "7. Registrar sistema en Red Hat"
-    echo "8. Actualizar sistema operativo"
-    echo "9. Salir"
-
-    read -p "Selecciona una opción: " choice
+    show_menu
 
     case $choice in
         1) configure_network ;;
@@ -185,6 +207,6 @@ while true; do
         7) register_redhat_system ;;
         8) update_system ;;
         9) exit ;;
-        *) echo "Opción no válida. Inténtalo de nuevo." ;;
+        *) echo -e "${RED}Opción no válida. Inténtalo de nuevo.${NC}" ;;
     esac
 done

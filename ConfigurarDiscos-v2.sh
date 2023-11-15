@@ -52,15 +52,23 @@ listar_particiones_expansibles() {
 
 expandir_particion() {
     listar_particiones_expansibles
-    PS3="Seleccione el número de la partición que desea expandir: "
-    select particion in "${particiones_expansibles[@]}"; do
-        if [ -n "$particion" ]; then
-            read -p "Ingrese el porcentaje de espacio adicional para la partición $particion: " porcentaje
-            read -p "Seleccione el disco desde el cual desea tomar el espacio disponible: " disco
 
-            lvextend -l +$porcentaje%FREE /dev/mapper/$particion --alloc $disco
-            resize2fs /dev/mapper/$particion
-            echo -e "\nLa partición LVM $particion se ha expandido en $porcentaje% del espacio disponible en el disco $disco."
+    # Obtener la lista de discos físicos sin LV ni VG asignados
+    discos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && system("lvdisplay " $1 " > /dev/null") == 1 && system("vgdisplay " $1 " > /dev/null") == 1 {print $1}'))
+
+    if [ ${#discos_disponibles[@]} -eq 0 ]; then
+        echo "No hay discos físicos disponibles para asignar espacio. Todos tienen LV o VG asignados."
+        return
+    fi
+
+    PS3="Seleccione el número del disco desde el cual desea tomar el espacio disponible: "
+    select disco in "${discos_disponibles[@]}"; do
+        if [ -n "$disco" ]; then
+            read -p "Ingrese la cantidad de espacio adicional en megabytes para $filesystem: " espacio_mb
+
+            lvextend -L +${espacio_mb}M /dev/$filesystem --alloc $disco
+            resize2fs /dev/$filesystem
+            echo -e "\nEl filesystem $filesystem se ha expandido en $espacio_mb megabytes desde el disco $disco."
             break
         else
             echo "Opción no válida. Intente de nuevo."

@@ -61,14 +61,28 @@ expandir_particion() {
         return
     fi
 
-    PS3="Seleccione el número del disco desde el cual desea tomar el espacio disponible: "
+    # Seleccionar o crear un Volume Group (VG)
+    PS3="Seleccione el número del disco para crear o seleccionar un Volume Group (VG): "
     select disco in "${discos_disponibles[@]}"; do
         if [ -n "$disco" ]; then
-            read -p "Ingrese la cantidad de espacio adicional en megabytes para $filesystem: " espacio_mb
+            read -p "Ingrese el nombre del nuevo o existente Volume Group (VG): " nombre_vg
 
-            lvextend -L +${espacio_mb}M /dev/$filesystem --alloc $disco
-            resize2fs /dev/$filesystem
-            echo -e "\nEl filesystem $filesystem se ha expandido en $espacio_mb megabytes desde el disco $disco."
+            # Verificar si el VG ya existe
+            if vgdisplay $nombre_vg &> /dev/null; then
+                echo "Seleccionando el Volume Group (VG) existente: $nombre_vg"
+            else
+                # Crear un nuevo VG
+                vgcreate $nombre_vg $disco
+                echo "Creando el nuevo Volume Group (VG): $nombre_vg en el disco $disco"
+            fi
+
+            # Solicitar la cantidad de espacio adicional
+            read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_vg: " espacio_mb
+
+            # Extender el VG y su filesystem
+            lvextend -L +${espacio_mb}M /dev/$nombre_vg/root
+            resize2fs /dev/$nombre_vg/root
+            echo -e "\nEl Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
             break
         else
             echo "Opción no válida. Intente de nuevo."

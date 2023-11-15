@@ -58,6 +58,57 @@ expandir_particion() {
 
     if [ ${#discos_disponibles[@]} -eq 0 ]; then
         echo "No hay discos físicos disponibles para asignar espacio. Todos tienen LV o VG asignados."
+        
+        # Permitir al usuario generar un nuevo VG o asignar un disco físico a un VG existente
+        read -p "¿Desea generar un nuevo Volume Group (VG) o asignar un disco físico a un VG existente? (s/n): " respuesta
+
+        if [ "$respuesta" = "s" ]; then
+            # Seleccionar o crear un Volume Group (VG)
+            PS3="Seleccione el número del disco para crear o seleccionar un Volume Group (VG): "
+            select disco in "${discos_disponibles[@]}"; do
+                if [ -n "$disco" ]; then
+                    read -p "Ingrese el nombre del nuevo o existente Volume Group (VG): " nombre_vg
+
+                    # Verificar si el VG ya existe
+                    if vgdisplay $nombre_vg &> /dev/null; then
+                        echo "Seleccionando el Volume Group (VG) existente: $nombre_vg"
+                    else
+                        # Crear un nuevo VG
+                        vgcreate $nombre_vg $disco
+                        echo "Creando el nuevo Volume Group (VG): $nombre_vg en el disco $disco"
+                    fi
+
+                    # Listar los LV dentro del VG
+                    lv_list=($(lvdisplay | awk -v vg="$nombre_vg" '/LV Path/ && $0 ~ vg {print $3}'))
+
+                    # Verificar si hay LV dentro del VG
+                    if [ ${#lv_list[@]} -eq 0 ]; then
+                        echo "No hay Logical Volumes (LV) en el Volume Group (VG) $nombre_vg para expandir."
+                        return
+                    fi
+
+                    # Solicitar al usuario que seleccione el LV
+                    PS3="Seleccione el número del Logical Volume (LV) que desea expandir: "
+                    select lv in "${lv_list[@]}"; do
+                        if [ -n "$lv" ]; then
+                            # Solicitar la cantidad de espacio adicional
+                            read -p "Ingrese la cantidad de espacio adicional en megabytes para $lv: " espacio_mb
+
+                            # Extender el LV y su filesystem
+                            lvextend -L +${espacio_mb}M /dev/$nombre_vg/$lv
+                            resize2fs /dev/$nombre_vg/$lv
+                            echo -e "\nEl Logical Volume (LV) $lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
+                            break
+                        else
+                            echo "Opción no válida. Intente de nuevo."
+                        fi
+                    done
+                else
+                    echo "Opción no válida. Intente de nuevo."
+                fi
+            done
+        fi
+
         return
     fi
 
@@ -76,14 +127,31 @@ expandir_particion() {
                 echo "Creando el nuevo Volume Group (VG): $nombre_vg en el disco $disco"
             fi
 
-            # Solicitar la cantidad de espacio adicional
-            read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_vg: " espacio_mb
+            # Listar los LV dentro del VG
+            lv_list=($(lvdisplay | awk -v vg="$nombre_vg" '/LV Path/ && $0 ~ vg {print $3}'))
 
-            # Extender el VG y su filesystem
-            lvextend -L +${espacio_mb}M /dev/$nombre_vg/root
-            resize2fs /dev/$nombre_vg/root
-            echo -e "\nEl Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
-            break
+            # Verificar si hay LV dentro del VG
+            if [ ${#lv_list[@]} -eq 0 ]; then
+                echo "No hay Logical Volumes (LV) en el Volume Group (VG) $nombre_vg para expandir."
+                return
+            fi
+
+            # Solicitar al usuario que seleccione el LV
+            PS3="Seleccione el número del Logical Volume (LV) que desea expandir: "
+            select lv in "${lv_list[@]}"; do
+                if [ -n "$lv" ]; then
+                    # Solicitar la cantidad de espacio adicional
+                    read -p "Ingrese la cantidad de espacio adicional en megabytes para $lv: " espacio_mb
+
+                    # Extender el LV y su filesystem
+                    lvextend -L +${espacio_mb}M /dev/$nombre_vg/$lv
+                    resize2fs /dev/$nombre_vg/$lv
+                    echo -e "\nEl Logical Volume (LV) $lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
+                    break
+                else
+                    echo "Opción no válida. Intente de nuevo."
+                fi
+            done
         else
             echo "Opción no válida. Intente de nuevo."
         fi

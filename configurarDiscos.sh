@@ -13,6 +13,9 @@ limpiar_pantalla() {
 mostrar_discos() {
     echo "Listado de discos físicos:"
     lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
+    echo -e "\nVolúmenes lógicos y grupos de volúmenes activos:"
+    lvdisplay
+    vgdisplay
 }
 
 actualizar_discos() {

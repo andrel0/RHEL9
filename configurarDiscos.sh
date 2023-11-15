@@ -11,8 +11,8 @@ limpiar_pantalla() {
 }
 
 mostrar_discos() {
-    echo "Listado de discos:"
-    fdisk -l
+    echo "Listado de discos físicos:"
+    lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
 }
 
 actualizar_discos() {

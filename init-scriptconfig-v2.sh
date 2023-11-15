@@ -89,17 +89,17 @@ show_ssh_port() {
 
 # Función para mostrar la configuración de Chrony
 show_chrony_config() {
-    echo "Configuración de Chrony"
-    echo -e "${YELLOW}Status del servicio chronyd:${NC}"
+    echo -e "${YELLOW}Status del Servicio chronyd:${NC}"
     systemctl is-enabled chronyd
     systemctl is-active chronyd
+    echo -e "${YELLOW}Configuración actual Chrony:${NC}"
     grep -v '^#\|^$' /etc/chrony.conf
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
 # Función para mostrar el status de firewalld y reglas creadas
 show_firewalld_status() {
-    echo -e "${YELLOW}Mostrando status de firewalld:${NC}"
+    echo -e "${YELLOW}Mostrando status de  servicio firewalld:${NC}"
     systemctl is-active firewalld
     systemctl is-enabled firewalld
     echo -e "${YELLOW}Mostrando reglas de firewalld:${NC}"
@@ -109,7 +109,7 @@ show_firewalld_status() {
 
 # Función para mostrar configuración de logs y logrotate
 show_logs_config() {
-    echo -e "${YELLOW}Mostrando status del servicio:${NC}"
+    echo -e "${YELLOW}Mostrando status del servicio Rsyslog:${NC}"
     systemctl is-enabled rsyslog
     systemctl is-active rsyslog
     echo -e "${YELLOW}Mostrando configuración actual de logs:${NC}"
@@ -122,7 +122,7 @@ show_logs_config() {
 
 # Función para mostrar configuración de auditd
 show_auditd_config() {
-    echo -e "${YELLOW}Mostrando status servicio auditd:${NC}"
+    echo -e "${YELLOW}Mostrando status servicio Auditd:${NC}"
     systemctl is-enabled auditd
     systemctl is-active auditd
     echo -e "${YELLOW}Mostrando configuración de auditd:${NC}"

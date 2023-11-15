@@ -210,10 +210,9 @@ show_menu() {
     echo -e "8. ${YELLOW}Mostrar configuración de logs/logrotate${NC}"
     echo -e "9. ${YELLOW}Mostrar configuración de auditd${NC}"
     echo -e "10. ${YELLOW}Mostrar directivas de seguridad de contraseñas${NC}"
-    echo -e "11. ${YELLOW}Mostrar estado de servicios${NC}"
-    echo -e "12. ${YELLOW}Registrar sistema en Red Hat${NC}"
-    echo -e "13. ${YELLOW}Actualizar sistema operativo${NC}"
-    echo -e "14. ${RED}Salir${NC}"
+    echo -e "11. ${YELLOW}Registrar sistema en Red Hat${NC}"
+    echo -e "12. ${YELLOW}Actualizar sistema operativo${NC}"
+    echo -e "13. ${RED}Salir${NC}"
     echo -e "-----------------------------------------"
     read -p "Selecciona una opción: " choice
 }
@@ -233,10 +232,9 @@ while true; do
         8) show_logs_config ;;
         9) show_auditd_config ;;
         10) show_pwquality_config ;;
-        11) show_services_status ;;
-        12) register_redhat_system ;;
-        13) update_system ;;
-        14) exit ;;
+        11) register_redhat_system ;;
+        12) update_system ;;
+        13) exit ;;
         *) echo -e "${RED}Opción no válida. Inténtalo de nuevo.${NC}" ;;
     esac
 done

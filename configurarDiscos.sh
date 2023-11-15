@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Verificar si se ejecuta como root
+if [ "$(id -u)" != "0" ]; then
+    echo "Este script debe ejecutarse como root. Por favor, use sudo o inicie sesión como root."
+    exit 1
+fi
+
 limpiar_pantalla() {
     clear
 }
@@ -15,16 +21,10 @@ actualizar_discos() {
     echo "¡Información de discos actualizada!"
 }
 
-refrescar_datos_particiones() {
-    limpiar_pantalla
-    actualizar_discos
-    buscar_espacio_no_asignado
-}
-
 listar_particiones() {
     limpiar_pantalla
     echo -e "Listado de particiones:"
-    lvdisplay
+    lvdisplay | awk '/LV Path/ {print $3}'
 }
 
 listar_particiones_expansibles() {
@@ -40,11 +40,6 @@ listar_particiones_expansibles() {
     for ((i=0; i<${#particiones_expansibles[@]}; i++)); do
         echo "$((i+1)). ${particiones_expansibles[i]}"
     done
-}
-
-buscar_espacio_no_asignado() {
-    echo -e "\nBuscando espacio no asignado..."
-    lvdisplay
 }
 
 expandir_particion() {
@@ -67,24 +62,22 @@ while true; do
     echo -e "--- Menú Principal ---"
     echo "1. Mostrar discos"
     echo "2. Refrescar información de discos"
-    echo "3. Refrescar datos de particiones"
-    echo "4. Listar todas las particiones"
-    echo "5. Listar particiones LVM que pueden expandirse"
-    echo "6. Buscar espacio no asignado"
-    echo "7. Expandir partición LVM"
-    echo "8. Salir"
+    echo "3. Listar todas las particiones"
+    echo "4. Listar particiones LVM que pueden expandirse"
+    echo "5. Buscar espacio no asignado"
+    echo "6. Expandir partición LVM"
+    echo "7. Salir"
 
-    read -p "Seleccione una opción (1-8): " opcion
+    read -p "Seleccione una opción (1-7): " opcion
 
     case $opcion in
         1) mostrar_discos ;;
         2) actualizar_discos ;;
-        3) refrescar_datos_particiones ;;
-        4) listar_particiones ;;
-        5) listar_particiones_expansibles ;;
-        6) buscar_espacio_no_asignado ;;
-        7) expandir_particion ;;
-        8) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
+        3) listar_particiones ;;
+        4) listar_particiones_expansibles ;;
+        5) buscar_espacio_no_asignado ;;
+        6) expandir_particion ;;
+        7) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
         *) echo "Opción no válida. Intente de nuevo." ;;
     esac
 

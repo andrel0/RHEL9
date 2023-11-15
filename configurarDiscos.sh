@@ -14,8 +14,8 @@ mostrar_discos() {
     echo "Listado de discos físicos:"
     lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
     echo -e "\nVolúmenes lógicos y grupos de volúmenes activos:"
-    lvdisplay
-    vgdisplay
+    lvdisplay | awk '/LV Path|LV Name|VG Name|LV Size|Allocatable/ {printf "%s ", $3} /LV Path|LV Size/ {if ($1 == "LV Path") printf "\n"; printf "%s ", $3} /VG Name/ {printf "(VG: %s)\n", $3}'
+    vgdisplay | awk '/VG Name|VG Size|Alloc PE/ {printf "%s ", $3} /VG Size/ {printf "(Size: %s) ", $3} /Alloc PE/ {printf "(Alloc PE: %s)\n", $3}'
 }
 
 actualizar_discos() {

@@ -48,7 +48,8 @@ configure_dns() {
     nmcli connection modify ens192 ipv4.dns "$dns_server1 $dns_server2"
     nmcli connection up ens192
 
-    echo "DNS configurado correctamente."
+    echo -e "${YELLOW}DNS configurado correctamente:${NC}"
+    grep -v '^#\|^$' /etc/resolv.conf
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
@@ -87,8 +88,10 @@ show_ssh_port() {
     read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
 }
 
-# Función para mostrar la configuración de Chrony
+# Función para mostrar la configuración de Chrony - Date - timedatectl
 show_chrony_config() {
+    echo -e "${YELLOW}Fecha / Hora:${NC}"
+    timedatectl
     echo -e "${YELLOW}Status del Servicio chronyd:${NC}"
     systemctl is-enabled chronyd
     systemctl is-active chronyd
@@ -131,18 +134,18 @@ show_auditd_config() {
 }
 
 # Función para mostrar directivas de seguridad de contraseñas
-show_pwquality_config() {
-    echo -e "${YELLOW}Mostrando directivas de seguridad de contraseñas:${NC}"
-    echo -e "Longitud mínima de la contraseña: $(authconfig --test | grep "password.*minlen" | awk -F'=' '{print $2}')"
-    echo -e "Longitud máxima de la contraseña: $(authconfig --test | grep "password.*maxlen" | awk -F'=' '{print $2}')"
-    echo -e "Número mínimo de letras en la contraseña: $(authconfig --test | grep "password.*minclass" | awk -F'=' '{print $2}')"
-    echo -e "Número mínimo de dígitos en la contraseña: $(authconfig --test | grep "password.*mindigit" | awk -F'=' '{print $2}')"
-    echo -e "Número mínimo de caracteres especiales en la contraseña: $(authconfig --test | grep "password.*minclass.*-special" | awk -F'=' '{print $2}')"
-    echo -e "Días antes de que una contraseña pueda ser cambiada: $(authconfig --test | grep "password.*minclass.*-change-days" | awk -F'=' '{print $2}')"
-    echo -e "Días antes de que una contraseña deba ser cambiada: $(authconfig --test | grep "password.*maxrepeat" | awk -F'=' '{print $2}')"
-    echo -e "Días antes de que una contraseña deba ser cambiada después de que expire: $(authconfig --test | grep "password.*maxclassrepeat" | awk -F'=' '{print $2}')"
-    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
-}
+#show_pwquality_config() {
+#    echo -e "${YELLOW}Mostrando directivas de seguridad de contraseñas:${NC}"
+#    echo -e "Longitud mínima de la contraseña: $(authconfig --test | grep "password.*minlen" | awk -F'=' '{print $2}')"
+#    echo -e "Longitud máxima de la contraseña: $(authconfig --test | grep "password.*maxlen" | awk -F'=' '{print $2}')"
+#    echo -e "Número mínimo de letras en la contraseña: $(authconfig --test | grep "password.*minclass" | awk -F'=' '{print $2}')"
+#    echo -e "Número mínimo de dígitos en la contraseña: $(authconfig --test | grep "password.*mindigit" | awk -F'=' '{print $2}')"
+#    echo -e "Número mínimo de caracteres especiales en la contraseña: $(authconfig --test | grep "password.*minclass.*-special" | awk -F'=' '{print $2}')"
+#    echo -e "Días antes de que una contraseña pueda ser cambiada: $(authconfig --test | grep "password.*minclass.*-change-days" | awk -F'=' '{print $2}')"
+#    echo -e "Días antes de que una contraseña deba ser cambiada: $(authconfig --test | grep "password.*maxrepeat" | awk -F'=' '{print $2}')"
+#    echo -e "Días antes de que una contraseña deba ser cambiada después de que expire: $(authconfig --test | grep "password.*maxclassrepeat" | awk -F'=' '{print $2}')"
+#    read -n 1 -s -r -p "Presiona cualquier tecla para volver al menú..."
+#}
 
 # Función para registrar el sistema en Red Hat
 register_redhat_system() {
@@ -212,14 +215,13 @@ show_menu() {
     echo -e "3. ${YELLOW}Configurar DNS${NC}"
     echo -e "4. ${YELLOW}Configurar NTP${NC}"
     echo -e "5. ${YELLOW}Mostrar puerto SSH${NC}"
-    echo -e "6. ${YELLOW}Mostrar configuración de Chrony${NC}"
+    echo -e "6. ${YELLOW}Mostrar configuración de Chrony/Fecha y Hora${NC}"
     echo -e "7. ${YELLOW}Mostrar status de Firewalld${NC}"
     echo -e "8. ${YELLOW}Mostrar configuración de logs/logrotate${NC}"
     echo -e "9. ${YELLOW}Mostrar configuración de Auditd${NC}"
-    echo -e "10. ${YELLOW}Mostrar directivas de seguridad de contraseñas${NC}"
-    echo -e "11. ${YELLOW}Registrar sistema en Red Hat${NC}"
-    echo -e "12. ${YELLOW}Actualizar sistema operativo${NC}"
-    echo -e "13. ${RED}Salir${NC}"
+    echo -e "10. ${YELLOW}Registrar sistema en Red Hat${NC}"
+    echo -e "11. ${YELLOW}Actualizar sistema operativo${NC}"
+    echo -e "12. ${RED}Salir${NC}"
     echo -e "-----------------------------------------"
     read -p "Selecciona una opción: " choice
 }
@@ -238,10 +240,9 @@ while true; do
         7) show_firewalld_status ;;
         8) show_logs_config ;;
         9) show_auditd_config ;;
-        10) show_pwquality_config ;;
-        11) register_redhat_system ;;
-        12) update_system ;;
-        13) exit ;;
+        10) register_redhat_system ;;
+        11) update_system ;;
+        12) exit ;;
         *) echo -e "${RED}Opción no válida. Inténtalo de nuevo.${NC}" ;;
     esac
 done

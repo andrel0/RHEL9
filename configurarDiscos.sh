@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Declaración variables global para almacenar la lista de discos nuevos
+discos_nuevos_disponibles=()
+
 limpiar_pantalla() {
     clear
 }
@@ -16,7 +19,7 @@ refrescar_y_detectar_discosnuevos() {
     partprobe > /dev/null  # Se ejecuta sin mostrar la salida en pantalla
 
     # Obtener la lista de discos físicos nuevos sin particiones ni LVM
-    discos_nuevos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && system("lvdisplay " $1 " > /dev/null") == 1 && system("vgdisplay " $1 " > /dev/null") == 1 && system("parted /dev/" $1 " print | grep -q '^$'") == 0 {print $1}'))
+    discos_nuevos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && system("lvdisplay " $1 " > /dev/null") == 1 && system("vgdisplay " $1 " > /dev/null") == 1 {print $1}'))
 
     if [ ${#discos_nuevos_disponibles[@]} -eq 0 ]; then
         echo "No se han encontrado discos físicos nuevos con espacio disponible y sin particiones ni LVM asignados."
@@ -25,18 +28,19 @@ refrescar_y_detectar_discosnuevos() {
 
     echo "Discos físicos nuevos detectados con espacio disponible y sin particiones ni LVM asignados:"
     for disco in "${discos_nuevos_disponibles[@]}"; do
-        espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
-        echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
+        # Asegúrate de que el disco no tenga una tabla de particiones conocida
+        if ! parted /dev/$disco print | grep -q "Partition Table: unknown"; then
+            espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
+            echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
+        fi
     done
-
-    # Puedes almacenar la lista de discos nuevos en una variable global o pasarla a otras funciones según necesidades.
 }
 
 # Ejemplo de uso:
-# mostrar_y_detectar_discos
+# refrescar_y_detectar_discosnuevos
 # echo "Discos nuevos disponibles: ${discos_nuevos_disponibles[@]}"
 
-listar_particiones_expansibles() {
+listar_particiones_expandibles() {
     limpiar_pantalla
     echo -e "Particiones LVM (Logical Volumes y Volume Groups) que pueden expandirse:"
 
@@ -236,7 +240,7 @@ while true; do
 
     case $opcion in
         1) refrescar_y_detectar_discosnuevos ;;
-        2) listar_particiones_expansibles ;;
+        2) listar_particiones_expandibles ;;
         3) crear_particion_lvm ;;
         4) expandir_particion ;;
         5) crear_vg_lv ;;

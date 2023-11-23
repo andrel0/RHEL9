@@ -10,7 +10,7 @@
     partprobe > /dev/null  # Se ejecuta sin mostrar la salida en pantalla
 
     # Obtener la lista de discos físicos nuevos sin particiones ni LVM
-    discos_nuevos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && system("lvdisplay " $1 " > /dev/null") == 1 && system("vgdisplay " $1 " > /dev/null") == 1 {print $1}'))
+    discos_nuevos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && system("vgdisplay " $1 " > /dev/null") == 1 && system("parted /dev/" $1 " print | grep -q \'^$\'") == 0 {print $1}'))
 
     echo "Lista de discos obtenida: ${discos_nuevos_disponibles[@]}"
 

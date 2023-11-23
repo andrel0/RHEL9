@@ -154,20 +154,6 @@ crear_vg_lv() {
     lvcreate -L ${tamano_inicial_mb}M -n $nombre_lv $nombre_vg
 }
 
-expandir_fs_lvm() {
-    # Expandir el filesystem en un Logical Volume (LV)
-    echo "Expandir el filesystem en un Logical Volume (LV)..."
-    lvdisplay
-    read -p "Ingrese el nombre del Volume Group (VG): " nombre_vg
-    read -p "Ingrese el nombre del Logical Volume (LV) que desea expandir: " nombre_lv
-    read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_lv: " espacio_mb
-
-    # Extender el LV y su filesystem
-    lvextend -L +${espacio_mb}M /dev/$nombre_vg/$nombre_lv
-    resize2fs /dev/$nombre_vg/$nombre_lv
-    echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes."
-}
-
 while true; do
     limpiar_pantalla
     echo -e "--- Menú Principal ---"
@@ -176,8 +162,7 @@ while true; do
     echo "3. Crear partición LVM"
     echo "4. Expandir partición existente"
     echo "5. Crear nuevo Volume Group (VG) y Logical Volume (LV)"
-    echo "6. Expandir filesystem en Logical Volume (LV)"
-    echo "7. Salir"
+    echo "6. Salir"
 
     read -p "Seleccione una opción (1-9): " opcion
 
@@ -187,8 +172,7 @@ while true; do
         3) crear_particion_lvm ;;
         4) expandir_particion ;;
         5) crear_vg_lv ;;
-        6) expandir_fs_lvm ;;
-        8) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
+        6) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
         *) echo "Opción no válida. Intente de nuevo." ;;
     esac
 

@@ -154,17 +154,63 @@ crear_vg_lv() {
     lvcreate -L ${tamano_inicial_mb}M -n $nombre_lv $nombre_vg
 }
 
+rollback() {
+    limpiar_pantalla
+    echo "Realizando rollback..."
+
+    # Mostrar discos físicos asignados
+    echo "Discos físicos asignados:"
+    pvs -o +devices
+
+    read -p "Ingrese el nombre del disco físico que desea deshacer (por ejemplo, /dev/sdX): " disco_rollback
+
+    # Verificar si el disco especificado es /dev/sda
+    if [ "$disco_rollback" == "/dev/sda" ]; then
+        echo "Error: No se puede realizar un rollback sobre el disco principal del sistema (/dev/sda). Operación cancelada."
+        return
+    fi
+
+    # Verificar si el disco pertenece a LVM
+    if ! pvs $disco_rollback &> /dev/null; then
+        echo "Error: El disco especificado no pertenece a un Physical Volume (PV) de LVM. Operación cancelada."
+        return
+    fi
+
+    # Confirmación del usuario
+    read -p "¿Está seguro de que desea deshacer la asignación del disco físico $disco_rollback? (s/n): " confirmacion
+    if [ "$confirmacion" != "s" ]; then
+        echo "Operación cancelada por el usuario."
+        return
+    fi
+
+    # Desasignar el disco físico del PV, VG y LV
+    echo "Ejecutando: pvremove $disco_rollback"
+    pvremove $disco_rollback
+
+    echo "Ejecutando: vgremove $(vgdisplay $disco_rollback | awk '/VG Name/ {print $3}')"
+    vgremove $(vgdisplay $disco_rollback | awk '/VG Name/ {print $3}')
+
+    echo "Ejecutando: lvremove $(lvdisplay $disco_rollback | awk '/LV Path/ {print $3}')"
+    lvremove $(lvdisplay $disco_rollback | awk '/LV Path/ {print $3}')
+
+    echo "Rollback completado. El disco físico $disco_rollback ha sido desasignado."
+
+    # Actualizar la información de discos
+    mostrar_escanear_discos_vmware
+}
+
 while true; do
     limpiar_pantalla
     echo -e "--- Menú Principal ---"
     echo "1. Mostrar/Refrescar información de discos"
     echo "2. Listar particiones LVM que pueden expandirse"
-    echo "3. Crear partición LVM"
+    echo "3. Crear nueva partición LVM ( solo para nuevos FS )"
     echo "4. Expandir partición existente"
     echo "5. Crear nuevo Volume Group (VG) y Logical Volume (LV)"
-    echo "6. Salir"
+    echo "6. Rollback (Deshacer asignación de disco físico)"
+    echo "7. Salir"
 
-    read -p "Seleccione una opción (1-9): " opcion
+    read -p "Seleccione una opción (1-7): " opcion
 
     case $opcion in
         1) mostrar_escanear_discos_vmware ;;
@@ -172,9 +218,10 @@ while true; do
         3) crear_particion_lvm ;;
         4) expandir_particion ;;
         5) crear_vg_lv ;;
-        6) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
+        6) rollback ;; 
+        7) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
         *) echo "Opción no válida. Intente de nuevo." ;;
     esac
 
-    read -p "Presione Enter para volver al menú..."
+    read -p "Presione Enter para volver al menú anterior..."
 done

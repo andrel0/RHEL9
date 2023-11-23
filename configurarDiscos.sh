@@ -1,86 +1,192 @@
 #!/bin/bash
 
-# Verificar si se ejecuta como root
-if [ "$(id -u)" != "0" ]; then
-    echo "Este script debe ejecutarse como root. Por favor, use sudo o inicie sesión como root."
-    exit 1
-fi
-
 limpiar_pantalla() {
     clear
 }
 
-mostrar_discos() {
+mostrar_escanear_discos_vmware() {
     echo "Listado de discos físicos:"
     lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
-    #echo -e "\nVolúmenes lógicos y grupos de volúmenes activos:"
-    #lvdisplay | awk '/LV Path|LV Name|VG Name|LV Size|Allocatable/ {printf "%s ", $3} /LV Path|LV Size/ {if ($1 == "LV Path") printf "\n"; printf "%s ", $3} /VG Name/ {printf "(VG: %s)\n", $3}'
-    #vgdisplay | awk '/VG Name|VG Size|Alloc PE/ {printf "%s ", $3} /VG Size/ {printf "(Size: %s) ", $3} /Alloc PE/ {printf "(Alloc PE: %s)\n", $3}'
-}
-
-actualizar_discos() {
     echo -e "\nActualizando información de discos..."
+    # Escanear y agregar discos físicos detectados localmente en VMware
+    echo "Escaneando y agregando discos físicos detectados localmente en VMware..."
+    rescan-scsi-bus.sh
     partprobe
-    echo "¡Información de discos actualizada!"
-}
-
-listar_particiones() {
-    limpiar_pantalla
-    echo -e "Listado de particiones:"
-    lvdisplay | awk '/LV Path/ {print $3}'
 }
 
 listar_particiones_expansibles() {
     limpiar_pantalla
-    echo -e "Particiones LVM que pueden expandirse:"
-    particiones_expansibles=($(lvdisplay | awk '/LV Path/ {path=$3} /LV Size/ {size=$3} /Allocatable/ {if ($2=="yes") print path, size}' | cut -d' ' -f1))
+    echo -e "Particiones LVM (Logical Volumes y Volume Groups) que pueden expandirse:"
 
-    if [ ${#particiones_expansibles[@]} -eq 0 ]; then
-        echo "No hay particiones LVM disponibles para expandirse."
-        return
+    # Obtener todos los LV y VG disponibles
+    lv_list=($(lvdisplay | awk '/LV Path/ {print $3}'))
+    vg_list=($(vgdisplay | awk '/VG Name/ {print $3}'))
+
+    # Imprimir la lista de LV
+    if [ ${#lv_list[@]} -gt 0 ]; then
+        echo -e "\nLogical Volumes:"
+        for lv in "${lv_list[@]}"; do
+            echo "- $lv"
+        done
     fi
 
-    for ((i=0; i<${#particiones_expansibles[@]}; i++)); do
-        echo "$((i+1)). ${particiones_expansibles[i]}"
-    done
+    # Imprimir la lista de VG
+    if [ ${#vg_list[@]} -gt 0 ]; then
+        echo -e "\nVolume Groups:"
+        for vg in "${vg_list[@]}"; do
+            echo "- $vg"
+        done
+    fi
+
+    if [ ${#lv_list[@]} -eq 0 ] && [ ${#vg_list[@]} -eq 0 ]; then
+        echo "No hay Logical Volumes ni Volume Groups disponibles para expandirse."
+    fi
 }
 
 expandir_particion() {
-    listar_particiones_expansibles
-    PS3="Seleccione el número de la partición que desea expandir: "
-    select particion in "${particiones_expansibles[@]}"; do
-        if [ -n "$particion" ]; then
-            lvextend -l +100%FREE /dev/mapper/$particion
-            resize2fs /dev/mapper/$particion
-            echo -e "\nLa partición LVM $particion se ha expandido al 100% del espacio disponible."
-            break
-        else
-            echo "Opción no válida. Intente de nuevo."
+    # Obtener la lista de discos físicos sin particiones LVM
+    discos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && system("lvdisplay " $1 " > /dev/null") == 1 && system("vgdisplay " $1 " > /dev/null") == 1 {print $1}'))
+
+    if [ ${#discos_disponibles[@]} -eq 0 ]; then
+        echo "No hay discos físicos disponibles sin particiones LVM."
+        
+        # Permitir al usuario generar un nuevo VG o asignar un disco físico a un VG existente
+        read -p "¿Desea generar un nuevo Volume Group (VG) o asignar un disco físico a un VG existente? (s/n): " respuesta
+
+        if [ "$respuesta" = "s" ]; then
+            # Seleccionar o crear un Volume Group (VG)
+            PS3="Seleccione el número del disco para crear o seleccionar un Volume Group (VG): "
+            select disco in "${discos_disponibles[@]}"; do
+                if [ -n "$disco" ]; then
+                    read -p "Ingrese el nombre del nuevo o existente Volume Group (VG): " nombre_vg
+
+                    # Verificar si el VG ya existe
+                    if vgdisplay $nombre_vg &> /dev/null; then
+                        echo "Seleccionando el Volume Group (VG) existente: $nombre_vg"
+                    else
+                        # Crear un nuevo VG
+                        vgcreate $nombre_vg $disco
+                        echo "Creando el nuevo Volume Group (VG): $nombre_vg en el disco $disco"
+                    fi
+
+                    # Listar los LV dentro del VG
+                    lv_list=($(lvdisplay | awk -v vg="$nombre_vg" '/LV Path/ && $0 ~ vg {print $3}'))
+
+                    # Verificar si hay LV dentro del VG
+                    if [ ${#lv_list[@]} -eq 0 ]; then
+                        echo "No hay Logical Volumes (LV) en el Volume Group (VG) $nombre_vg para expandir."
+                        return
+                    fi
+
+                    # Solicitar al usuario que seleccione el LV
+                    PS3="Seleccione el número del Logical Volume (LV) que desea expandir: "
+                    select lv in "${lv_list[@]}"; do
+                        if [ -n "$lv" ]; then
+                            # Solicitar la cantidad de espacio adicional en MB
+                            read -p "Ingrese la cantidad de espacio adicional en megabytes para $lv: " espacio_mb
+
+                            # Extender el LV y su filesystem
+                            lvextend -L +${espacio_mb}M /dev/$nombre_vg/$lv
+                            resize2fs /dev/$nombre_vg/$lv
+                            echo -e "\nEl Logical Volume (LV) $lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
+                            break
+                        else
+                            echo "Opción no válida. Intente de nuevo."
+                        fi
+                    done
+                else
+                    echo "Opción no válida. Intente de nuevo."
+                fi
+            done
         fi
-    done
+
+        return
+    fi
+}
+
+crear_particion_lvm() {
+    # Crear una partición LVM en el disco seleccionado
+    echo "Creando una partición LVM en el disco seleccionado..."
+    read -p "Ingrese el nombre del disco para crear una partición LVM: " disco
+
+    # Mostrar los PV actuales
+    echo -e "\nPhysical Volumes (PV) actuales:"
+    pvs
+
+    read -p "¿Desea asignar la partición a un PV existente o crear uno nuevo? (existente/nuevo): " eleccion
+
+    if [ "$eleccion" == "existente" ]; then
+        read -p "Ingrese el nombre del PV existente al que desea asignar la partición: " pv_existente
+
+        # Utilizar fdisk para crear una partición
+        fdisk /dev/$disco
+
+        # Agregar la partición al PV existente
+        pvcreate /dev/${disco}1
+        vgextend $pv_existente /dev/${disco}1
+        echo "La partición se ha asignado al PV existente: $pv_existente"
+    elif [ "$eleccion" == "nuevo" ]; then
+        read -p "Ingrese el nombre del nuevo PV que se creará: " nuevo_pv
+
+        # Utilizar fdisk para crear una partición
+        fdisk /dev/$disco
+
+        # Crear un nuevo PV y VG
+        pvcreate /dev/${disco}1
+        vgcreate $nuevo_pv /dev/${disco}1
+        echo "Se ha creado un nuevo PV y VG: $nuevo_pv"
+    else
+        echo "Opción no válida. Volviendo al menú principal."
+    fi
+}
+
+crear_vg_lv() {
+    # Crear un nuevo Volume Group (VG) y Logical Volume (LV)
+    echo "Creando un nuevo Volume Group (VG) y Logical Volume (LV)..."
+    read -p "Ingrese el nombre del nuevo Volume Group (VG): " nombre_vg
+    read -p "Ingrese el nombre del nuevo Logical Volume (LV): " nombre_lv
+    read -p "Ingrese el tamaño inicial del Logical Volume (LV) en megabytes: " tamano_inicial_mb
+
+    # Crear el nuevo VG y LV
+    vgcreate $nombre_vg /dev/${disco}1
+    lvcreate -L ${tamano_inicial_mb}M -n $nombre_lv $nombre_vg
+}
+
+expandir_fs_lvm() {
+    # Expandir el filesystem en un Logical Volume (LV)
+    echo "Expandir el filesystem en un Logical Volume (LV)..."
+    lvdisplay
+    read -p "Ingrese el nombre del Volume Group (VG): " nombre_vg
+    read -p "Ingrese el nombre del Logical Volume (LV) que desea expandir: " nombre_lv
+    read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_lv: " espacio_mb
+
+    # Extender el LV y su filesystem
+    lvextend -L +${espacio_mb}M /dev/$nombre_vg/$nombre_lv
+    resize2fs /dev/$nombre_vg/$nombre_lv
+    echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes."
 }
 
 while true; do
     limpiar_pantalla
     echo -e "--- Menú Principal ---"
-    echo "1. Mostrar discos"
-    echo "2. Refrescar información de discos"
-    echo "3. Listar todas las particiones"
-    echo "4. Listar particiones LVM que pueden expandirse"
-    echo "5. Buscar espacio no asignado"
-    echo "6. Expandir partición LVM"
+    echo "1. Mostrar/Refrescar información de discos"
+    echo "2. Listar particiones LVM que pueden expandirse"
+    echo "3. Expandir partición"
+    echo "4. Crear partición LVM"
+    echo "5. Crear nuevo Volume Group (VG) y Logical Volume (LV)"
+    echo "6. Expandir filesystem en Logical Volume (LV)"
     echo "7. Salir"
 
-    read -p "Seleccione una opción (1-7): " opcion
+    read -p "Seleccione una opción (1-9): " opcion
 
     case $opcion in
-        1) mostrar_discos ;;
-        2) actualizar_discos ;;
-        3) listar_particiones ;;
-        4) listar_particiones_expansibles ;;
-        5) buscar_espacio_no_asignado ;;
-        6) expandir_particion ;;
-        7) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
+        1) mostrar_escanear_discos_vmware ;;
+        2) listar_particiones_expansibles ;;
+        3) expandir_particion ;;
+        4) crear_particion_lvm ;;
+        5) crear_vg_lv ;;
+        6) expandir_fs_lvm ;;
+        8) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
         *) echo "Opción no válida. Intente de nuevo." ;;
     esac
 

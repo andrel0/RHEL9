@@ -51,7 +51,7 @@ expandir_particion() {
 
     if [ ${#discos_disponibles[@]} -eq 0 ]; then
         echo "No hay discos físicos disponibles sin particiones LVM."
-        
+
         # Permitir al usuario generar un nuevo VG o asignar un disco físico a un VG existente
         read -p "¿Desea generar un nuevo Volume Group (VG) o asignar un disco físico a un VG existente? (s/n): " respuesta
 

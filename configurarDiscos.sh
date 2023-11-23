@@ -4,15 +4,37 @@ limpiar_pantalla() {
     clear
 }
 
-mostrar_escanear_discos_vmware() {
+refrescar_y_detectar_discosnuevos() {
+    limpiar_pantalla
     echo "Listado de discos físicos:"
     lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
     echo -e "\nActualizando información de discos..."
+    
     # Escanear y agregar discos físicos detectados localmente en VMware
     echo "Escaneando y agregando discos físicos detectados localmente en VMware..."
-    rescan-scsi-bus.sh
-    partprobe
+    rescan-scsi-bus.sh > /dev/null  # Se ejecuta sin mostrar la salida en pantalla
+    partprobe > /dev/null  # Se ejecuta sin mostrar la salida en pantalla
+
+    # Obtener la lista de discos físicos nuevos sin particiones ni LVM
+    discos_nuevos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && system("lvdisplay " $1 " > /dev/null") == 1 && system("vgdisplay " $1 " > /dev/null") == 1 && system("parted /dev/" $1 " print | grep -q '^$'") == 0 {print $1}'))
+
+    if [ ${#discos_nuevos_disponibles[@]} -eq 0 ]; then
+        echo "No se han encontrado discos físicos nuevos con espacio disponible y sin particiones ni LVM asignados."
+        return
+    fi
+
+    echo "Discos físicos nuevos detectados con espacio disponible y sin particiones ni LVM asignados:"
+    for disco in "${discos_nuevos_disponibles[@]}"; do
+        espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
+        echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
+    done
+
+    # Puedes almacenar la lista de discos nuevos en una variable global o pasarla a otras funciones según necesidades.
 }
+
+# Ejemplo de uso:
+# mostrar_y_detectar_discos
+# echo "Discos nuevos disponibles: ${discos_nuevos_disponibles[@]}"
 
 listar_particiones_expansibles() {
     limpiar_pantalla
@@ -202,8 +224,8 @@ rollback() {
 while true; do
     limpiar_pantalla
     echo -e "--- Menú Principal ---"
-    echo "1. Mostrar/Refrescar información de discos"
-    echo "2. Listar particiones LVM que pueden expandirse"
+    echo "1. Refrescar y detectar discos"
+    echo "2. Listar FS LVM que pueden expandirse"
     echo "3. Crear nueva partición LVM ( solo para nuevos FS )"
     echo "4. Expandir partición existente"
     echo "5. Crear nuevo Volume Group (VG) y Logical Volume (LV)"
@@ -213,7 +235,7 @@ while true; do
     read -p "Seleccione una opción (1-7): " opcion
 
     case $opcion in
-        1) mostrar_escanear_discos_vmware ;;
+        1) refrescar_y_detectar_discosnuevos ;;
         2) listar_particiones_expansibles ;;
         3) crear_particion_lvm ;;
         4) expandir_particion ;;

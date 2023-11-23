@@ -28,3 +28,12 @@
             echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
         fi
     done
+
+
+  Volume group "sda" not found
+  Cannot process volume group sda
+  Volume group "sdb" not found
+  Cannot process volume group sdb
+  Volume group "sdc" not found
+  Cannot process volume group sdc
+Error: /dev/sdc: unrecognised disk label

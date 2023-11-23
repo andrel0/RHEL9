@@ -30,10 +30,46 @@ discos_nuevos_disponibles=()
     done
 
 
+
+
+[root@rhel9 ~]# ./debug.sh
+Listado de discos físicos:
+NAME                            SIZE TYPE MOUNTPOINT
+sda                              30G disk
+├─sda1                          600M part /boot/efi
+├─sda2                            1G part /boot
+└─sda3                         28.4G part
+  ├─vg_rhel_rhel9-root           20G lvm  /
+  ├─vg_rhel_rhel9-swap            2G lvm  [SWAP]
+  └─vg_rhel_rhel9-home          6.4G lvm  /home
+sdb                              10G disk
+└─sdb1                           10G part
+  ├─vg_rhel_rhel9_dinamico-var    5G lvm  /var
+  └─vg_rhel_rhel9_dinamico-tmp    5G lvm  /tmp
+sdc                               1G disk
+sr0                             8.9G rom
+
+Actualizando información de discos...
+Escaneando y agregando discos físicos detectados localmente en VMware...
+Warning: Unable to open /dev/sr0 read-write (Read-only file system).  /dev/sr0 has been opened read-only.
   Volume group "sda" not found
   Cannot process volume group sda
   Volume group "sdb" not found
   Cannot process volume group sdb
   Volume group "sdc" not found
   Cannot process volume group sdc
+Error: /dev/sdc: unrecognised disk label
+Lista de discos obtenida: sda sdb sdc
+Discos físicos nuevos detectados con espacio disponible y sin particiones ni LVM asignados:
+- sda (Espacio Disponible: 32212254720
+  629145600
+ 1073741824
+30507270144
+21474836480
+ 2147483648
+ 6878658560 bytes)
+- sdb (Espacio Disponible: 10737418240
+10735321088
+ 5368709120
+ 5364514816 bytes)
 Error: /dev/sdc: unrecognised disk label

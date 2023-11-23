@@ -22,11 +22,13 @@ listar_particiones_expansibles() {
     lv_list=($(lvdisplay | awk '/LV Path/ {print $3}'))
     vg_list=($(vgdisplay | awk '/VG Name/ {print $3}'))
 
-    # Imprimir la lista de LV
+    # Imprimir la lista de LV con el tipo de sistema de archivos y espacio disponible
     if [ ${#lv_list[@]} -gt 0 ]; then
         echo -e "\nLogical Volumes:"
         for lv in "${lv_list[@]}"; do
-            echo "- $lv"
+            fs_type=$(blkid -o value -s TYPE "$lv")
+            espacio_disponible=$(df -h --output=avail "$lv" | tail -n 1)
+            echo "- $lv (Tipo de Sistema de Archivos: $fs_type, Espacio Disponible: $espacio_disponible)"
         done
     fi
 
@@ -171,8 +173,8 @@ while true; do
     echo -e "--- Menú Principal ---"
     echo "1. Mostrar/Refrescar información de discos"
     echo "2. Listar particiones LVM que pueden expandirse"
-    echo "3. Expandir partición"
-    echo "4. Crear partición LVM"
+    echo "3. Crear partición LVM"
+    echo "4. Expandir partición existente"
     echo "5. Crear nuevo Volume Group (VG) y Logical Volume (LV)"
     echo "6. Expandir filesystem en Logical Volume (LV)"
     echo "7. Salir"
@@ -182,8 +184,8 @@ while true; do
     case $opcion in
         1) mostrar_escanear_discos_vmware ;;
         2) listar_particiones_expansibles ;;
-        3) expandir_particion ;;
-        4) crear_particion_lvm ;;
+        3) crear_particion_lvm ;;
+        4) expandir_particion ;;
         5) crear_vg_lv ;;
         6) expandir_fs_lvm ;;
         8) echo "Saliendo del script. ¡Hasta luego!"; exit ;;

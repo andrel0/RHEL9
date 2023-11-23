@@ -27,3 +27,34 @@
             echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
         fi
     done
+
+    
+Listado de discos físicos:
+NAME                            SIZE TYPE MOUNTPOINT
+sda                              30G disk
+├─sda1                          600M part /boot/efi
+├─sda2                            1G part /boot
+└─sda3                         28.4G part
+  ├─vg_rhel_rhel9-root           20G lvm  /
+  ├─vg_rhel_rhel9-swap            2G lvm  [SWAP]
+  └─vg_rhel_rhel9-home          6.4G lvm  /home
+sdb                              10G disk
+└─sdb1                           10G part
+  ├─vg_rhel_rhel9_dinamico-var    5G lvm  /var
+  └─vg_rhel_rhel9_dinamico-tmp    5G lvm  /tmp
+sdc                               1G disk
+sr0                             8.9G rom
+
+Actualizando información de discos...
+Escaneando y agregando discos físicos detectados localmente en VMware...
+Warning: Unable to open /dev/sr0 read-write (Read-only file system).  /dev/sr0 has been opened read-only.
+  Volume group "sda" not found
+  Cannot process volume group sda
+  Volume group "sdb" not found
+  Cannot process volume group sdb
+  Volume group "sdc" not found
+  Cannot process volume group sdc
+Lista de discos obtenida:
+No se han encontrado discos físicos nuevos con espacio disponible y sin particiones ni LVM asignados.
+./debug.sh: line 19: return: can only `return' from a function or sourced script
+Discos físicos nuevos detectados con espacio disponible y sin particiones ni LVM asignados:

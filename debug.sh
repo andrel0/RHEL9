@@ -1,4 +1,5 @@
 #! /bin/bash
+discos_nuevos_disponibles=()
 
     echo "Listado de discos físicos:"
     lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
@@ -10,8 +11,7 @@
     partprobe > /dev/null  # Se ejecuta sin mostrar la salida en pantalla
 
     # Obtener la lista de discos físicos nuevos sin particiones ni LVM
-   discos_nuevos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && !("vgdisplay "$1 | getline) && !("parted /dev/"$1" print" | getline) {print $1}'))
-
+    discos_nuevos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && !("vgdisplay "$1 | getline) && system("parted /dev/"$1" print | grep -q \"unrecognised disk label\"") {print $1}'))
 
     echo "Lista de discos obtenida: ${discos_nuevos_disponibles[@]}"
 

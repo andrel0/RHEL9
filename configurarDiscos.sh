@@ -34,8 +34,8 @@ function obtener_discos_nuevos() {
         echo "No se han encontrado discos físicos nuevos sin particiones."
     else
         echo "Discos físicos nuevos detectados sin particiones:"
-        # Guardar todos los discos en el array global
-        discos_nuevos_globales=("${discos_nuevos_disponibles[@]}")
+        # Guardar solo los nombres de los discos en el array global
+        discos_nuevos_globales=("${discos_nuevos_disponibles[@]##*/}")
         echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
     fi
 

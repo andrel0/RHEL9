@@ -9,7 +9,7 @@ function obtener_discos_nuevos() {
     local discos_nuevos_globales=()
 
     # Limpiar la pantalla
-    clear
+    limpiar_pantalla
 
     # Mostrar el listado de discos físicos
     echo "Listado de discos físicos:"
@@ -43,27 +43,28 @@ function obtener_discos_nuevos() {
     echo "${discos_nuevos_globales[@]}"
 }
 
-# Llamar a la función
-nombres_discos_nuevos=($(obtener_discos_nuevos))
-
 # Mostrar información adicional sobre los discos detectados
-if [ ${#nombres_discos_nuevos[@]} -gt 0 ]; then
-    echo -e "\nInformación adicional sobre los discos físicos nuevos:"
-    for disco in "${nombres_discos_nuevos[@]}"; do
-        echo -e "\n$disco:"
-        parted /dev/$disco print
-        # Puedes agregar más comandos para obtener información adicional
-    done
-fi
+function mostrar_informacion_adicional() {
+    local nombres_discos_nuevos=("$@")
 
+    if [ ${#nombres_discos_nuevos[@]} -gt 0 ]; then
+        echo -e "\nInformación adicional sobre los discos físicos nuevos:"
+        for disco in "${nombres_discos_nuevos[@]}"; do
+            echo -e "\n$disco:"
+            parted /dev/$disco print
+            # Puedes agregar más comandos para obtener información adicional
+        done
+    fi
+}
 
-listar_particiones_expandibles() {
+# Función para listar particiones expandibles
+function listar_particiones_expandibles() {
     limpiar_pantalla
     echo -e "Particiones LVM (Logical Volumes y Volume Groups) que pueden expandirse:"
 
     # Obtener todos los LV y VG disponibles
-    lv_list=($(lvdisplay | awk '/LV Path/ {print $3}'))
-    vg_list=($(vgdisplay | awk '/VG Name/ {print $3}'))
+    local lv_list=($(lvdisplay | awk '/LV Path/ {print $3}'))
+    local vg_list=($(vgdisplay | awk '/VG Name/ {print $3}'))
 
     # Imprimir la lista de LV con el tipo de sistema de archivos y espacio disponible
     if [ ${#lv_list[@]} -gt 0 ]; then
@@ -242,12 +243,13 @@ rollback() {
     mostrar_escanear_discos_vmware
 }
 
+# Bucle principal
 while true; do
     limpiar_pantalla
     echo -e "--- Menú Principal ---"
     echo "1. Refrescar y detectar discos"
     echo "2. Listar FS LVM que pueden expandirse"
-    echo "3. Crear nueva partición LVM ( solo nuevos FS )"
+    echo "3. Crear nueva partición LVM (solo nuevos FS)"
     echo "4. Expandir partición existente"
     echo "5. Crear nuevo Volume Group (VG) y Logical Volume (LV)"
     echo "6. Rollback (Deshacer asignación de disco físico)"
@@ -256,12 +258,12 @@ while true; do
     read -p "Seleccione una opción (1-7): " opcion
 
     case $opcion in
-        1) obtener_discos_nuevos ;;
+        1) nombres_discos_nuevos=($(obtener_discos_nuevos)); mostrar_informacion_adicional "${nombres_discos_nuevos[@]}" ;;
         2) listar_particiones_expandibles ;;
         3) crear_particion_lvm ;;
         4) expandir_particion ;;
         5) crear_vg_lv ;;
-        6) rollback ;; 
+        6) rollback ;;
         7) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
         *) echo "Opción no válida. Intente de nuevo." ;;
     esac

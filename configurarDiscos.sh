@@ -1,42 +1,60 @@
 #!/bin/bash
 
-# Declaración variables global para almacenar la lista de discos nuevos
-discos_nuevos_disponibles=()
-
 limpiar_pantalla() {
     clear
 }
 
-refrescar_y_detectar_discosnuevos() {
-    limpiar_pantalla
+function obtener_discos_nuevos() {
+    # Declaración de variables local
+    local discos_nuevos_globales=()
+
+    # Limpiar la pantalla
+    clear
+
+    # Mostrar el listado de discos físicos
     echo "Listado de discos físicos:"
     lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
+
+    # Actualizar información de discos
     echo -e "\nActualizando información de discos..."
 
-    # Obtener la lista de discos físicos nuevos sin particiones ni LVM
-    discos_nuevos_disponibles=()
+    # Obtener la lista de discos físicos nuevos sin particiones
+    local discos_nuevos_disponibles=()
 
-    while read -r disco tipo; do
-        # Asegúrate de que el disco no tenga particiones ni LVM
-        if [ "$tipo" == "disk" ] && [ -z "$(lsblk /dev/$disco -o NAME | tail -n +2)" ]; then
+    for disco in $(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'); do
+        # Asegúrate de que el disco no tenga particiones
+        if [ -n "$(parted /dev/$disco print 2>/dev/null | grep 'Partition Table: unknown')" ]; then
             espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
             echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
             discos_nuevos_disponibles+=($disco)
         fi
-    done < <(lsblk -o NAME,TYPE | tail -n +2)
+    done
 
     if [ ${#discos_nuevos_disponibles[@]} -eq 0 ]; then
-        echo "No se han encontrado discos físicos nuevos con espacio disponible y sin particiones ni LVM asignados."
-        return
+        echo "No se han encontrado discos físicos nuevos sin particiones."
+    else
+        echo "Discos físicos nuevos detectados sin particiones:"
+        # Guardar todos los discos en el array global
+        discos_nuevos_globales=("${discos_nuevos_disponibles[@]}")
+        echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
     fi
 
-    echo "Discos físicos nuevos detectados con espacio disponible y sin particiones ni LVM asignados:"
-    # la información se imprime en el bucle anterior
+    # Retornar el array de discos físicos nuevos
+    echo "${discos_nuevos_globales[@]}"
 }
 
-# Ejemplo de uso:
-refrescar_y_detectar_discosnuevos
-# echo "Discos nuevos disponibles: ${discos_nuevos_disponibles[@]}"
+# Llamar a la función
+nombres_discos_nuevos=($(obtener_discos_nuevos))
+
+# Mostrar información adicional sobre los discos detectados
+if [ ${#nombres_discos_nuevos[@]} -gt 0 ]; then
+    echo -e "\nInformación adicional sobre los discos físicos nuevos:"
+    for disco in "${nombres_discos_nuevos[@]}"; do
+        echo -e "\n$disco:"
+        parted /dev/$disco print
+        # Puedes agregar más comandos para obtener información adicional
+    done
+fi
 
 
 listar_particiones_expandibles() {
@@ -229,7 +247,7 @@ while true; do
     echo -e "--- Menú Principal ---"
     echo "1. Refrescar y detectar discos"
     echo "2. Listar FS LVM que pueden expandirse"
-    echo "3. Crear nueva partición LVM ( solo para nuevos FS )"
+    echo "3. Crear nueva partición LVM ( solo nuevos FS )"
     echo "4. Expandir partición existente"
     echo "5. Crear nuevo Volume Group (VG) y Logical Volume (LV)"
     echo "6. Rollback (Deshacer asignación de disco físico)"
@@ -238,7 +256,7 @@ while true; do
     read -p "Seleccione una opción (1-7): " opcion
 
     case $opcion in
-        1) refrescar_y_detectar_discosnuevos ;;
+        1) obtener_discos_nuevos ;;
         2) listar_particiones_expandibles ;;
         3) crear_particion_lvm ;;
         4) expandir_particion ;;

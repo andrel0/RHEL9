@@ -19,8 +19,8 @@ partprobe > /dev/null  # Se ejecuta sin mostrar la salida en pantalla
 discos_nuevos_disponibles=()
 
 while read -r disco tipo; do
-    # Asegúrate de que el disco no tenga particiones ni LVM
-    if [ "$tipo" == "disk" ] && [ -z "$(lsblk /dev/$disco -o NAME | tail -n +2)" ]; then
+    # Asegúrate de que el disco no tenga particiones
+    if [ "$tipo" == "disk" ] && [ -z "$(fdisk -l /dev/$disco 2>/dev/null | grep -E '/dev/'$disco':[0-9]+')" ]; then
         espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
         echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
         discos_nuevos_disponibles+=($disco)

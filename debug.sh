@@ -39,7 +39,7 @@ if [ ${#discos_nuevos_globales[@]} -gt 0 ]; then
     echo -e "\nInformación adicional sobre los discos físicos nuevos:"
     for disco in "${discos_nuevos_globales[@]}"; do
         echo -e "\n$disco:"
-        hdparm -I /dev/$disco
+        parted  /dev/$disco print
         # Puedes agregar más comandos para obtener información adicional según tus necesidades
     done
 fi

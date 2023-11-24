@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Declaración de variables global
+discos_nuevos_globales=()
+
 # Limpiar la pantalla
 clear
 
@@ -15,7 +18,7 @@ discos_nuevos_disponibles=()
 
 for disco in $(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'); do
     # Asegúrate de que el disco no tenga particiones
-    if [ -z "$(parted /dev/$disco print 2>/dev/null | grep -E 'Partition Table:')" ]; then
+    if [ -n "$(parted /dev/$disco print 2>/dev/null | grep 'Partition Table: unknown')" ]; then
         espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
         echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
         discos_nuevos_disponibles+=($disco)
@@ -26,5 +29,17 @@ if [ ${#discos_nuevos_disponibles[@]} -eq 0 ]; then
     echo "No se han encontrado discos físicos nuevos sin particiones."
 else
     echo "Discos físicos nuevos detectados sin particiones:"
-    # Ya no es necesario iterar sobre la variable discos_nuevos_disponibles, ya que la información se imprime en el bucle anterior
+    # Guardar todos los discos en el array global
+    discos_nuevos_globales=("${discos_nuevos_disponibles[@]}")
+    echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
+fi
+
+# Mostrar información adicional sobre los discos detectados
+if [ ${#discos_nuevos_globales[@]} -gt 0 ]; then
+    echo -e "\nInformación adicional sobre los discos físicos nuevos:"
+    for disco in "${discos_nuevos_globales[@]}"; do
+        echo -e "\n$disco:"
+        hdparm -I /dev/$disco
+        # Puedes agregar más comandos para obtener información adicional según tus necesidades
+    done
 fi

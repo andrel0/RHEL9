@@ -7,7 +7,7 @@ function obtener_discos_nuevos() {
 
     for disco in /sys/class/block/sd*; do
         # Verificar si el disco tiene particiones reconocibles
-        if [ ! -d "$disco"/[a-z]* ]; then
+        if [ ! -d "$disco"/"$(basename $disco)"[0-9]* ]; then
             # Verificar si el disco tiene una tabla de particiones desconocida o es reconocible por LVM
             if ! parted /dev/$(basename $disco) print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
                 echo "- $(basename $disco)"

@@ -12,7 +12,7 @@ function obtener_discos_nuevos() {
                 echo "$disco"
                 discos_nuevos_disponibles+=("$disco")
                 # Redirigir la salida de parted al archivo en /tmp
-                parted /dev/$disco print 2>/dev/null > /tmp/$disco.parted
+                parted /dev/$disco print 2>/dev/null > "/tmp/$disco.parted"
             fi
         fi
     done
@@ -31,10 +31,10 @@ function mostrar_informacion_adicional() {
             
             # Verificar si el disco tiene una tabla de particiones reconocible
             if [ -e "/tmp/$disco.parted" ]; then
-                cat "/tmp/$disco.parted" | sed '1,5d'  # Eliminar las primeras 5 líneas
+                sed '1,5d' "/tmp/$disco.parted"  # Eliminar las primeras 5 líneas
                 # Puedes agregar más comandos para obtener información adicional
             else
-                echo "No existen discos fisicos sin tablas de particiones."
+                echo "No existen discos físicos sin tablas de particiones."
             fi
         done
     fi
@@ -42,6 +42,9 @@ function mostrar_informacion_adicional() {
 
 # Ejecutar la función principal y obtener los nombres de los discos nuevos
 nombres_discos_nuevos=($(obtener_discos_nuevos))
+
+# Pasar los nombres de los discos nuevos a la función para mostrar información adicional
+mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
 
 # Pasar los nombres de los discos nuevos a la función para mostrar información adicional
 mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"

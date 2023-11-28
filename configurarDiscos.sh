@@ -51,7 +51,7 @@ function mostrar_informacion_adicional() {
         for disco in "${nombres_discos_nuevos[@]}"; do
             echo -e "\n$disco:"
             # Verificar si el disco tiene una tabla de particiones reconocible
-            if [ -e "/sys/class/block/$disco/partition" ]; then
+            if parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
                 parted /dev/$disco print
                 # Puedes agregar más comandos para obtener información adicional
             else

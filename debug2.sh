@@ -4,7 +4,7 @@ function obtener_discos_nuevos() {
     local discos_nuevos_disponibles=()
 
     # Iterar sobre discos físicos
-    for disco in $(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" {print $1}'); do
+    while IFS= read -r disco; do
         # Verificar si el disco tiene particiones reconocibles
         if [ -z "$(lsblk -rno NAME,MOUNTPOINT /dev/${disco}[0-9] 2>/dev/null)" ]; then
             # Verificar si el disco tiene una tabla de particiones desconocida y no es reconocible por LVM
@@ -15,7 +15,7 @@ function obtener_discos_nuevos() {
                 parted /dev/$disco print 2>/dev/null > "/tmp/$disco.parted"
             fi
         fi
-    done
+    done < <(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" {print $1}')
 
     # Retornar el array de discos físicos nuevos
     echo "${discos_nuevos_disponibles[@]}"

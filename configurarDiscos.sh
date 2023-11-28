@@ -11,40 +11,34 @@ function obtener_discos_nuevos() {
     # Limpiar la pantalla
     limpiar_pantalla
 
-    # Mostrar el listado de discos físicos
-    echo "Listado de discos físicos:"
-    lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
-
-    # Actualizar información de discos
-    echo -e "\nActualizando información de discos..."
-
-    # Obtener la lista de discos físicos nuevos sin particiones
-    local discos_nuevos_disponibles=()
-
-    for disco in /sys/class/block/sd*; do
-        # Verificar si el disco tiene particiones reconocibles
-        if [ ! -d "$disco"/[a-z]* ]; then
-            espacio_disponible=$(lsblk -o SIZE -b -n /dev/$(basename $disco))
-            echo "- $(basename $disco) (Espacio Disponible: $espacio_disponible bytes)"
-            discos_nuevos_disponibles+=("$(basename $disco)")
-        fi
-    done
+    # Mostrar el listado de discos físicos sin particiones
+    echo "Listado de discos físicos sin particiones:"
+    discos_nuevos_disponibles=($(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" && $3 == "" {print $1}'))
 
     if [ ${#discos_nuevos_disponibles[@]} -eq 0 ]; then
         echo "No se han encontrado discos físicos nuevos sin particiones."
     else
-        echo "Discos físicos nuevos detectados sin particiones:"
-        # Guardar solo los nombres de los discos en el array global
-        discos_nuevos_globales=("${discos_nuevos_disponibles[@]}")
-        echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
+        for disco in "${discos_nuevos_disponibles[@]}"; do
+            # Verificar si el disco tiene una tabla de particiones reconocible por LVM o desconocida
+            if [ "$(parted /dev/$disco print 2>/dev/null | grep 'Partition Table:')" == "Partition Table: unknown" ] || [ "$(parted /dev/$disco print 2>/dev/null | grep 'Partition Table: gpt\|msdos')" == "" ]; then
+                espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
+                echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
+                discos_nuevos_globales+=("$disco")
+            fi
+        done
+
+        if [ ${#discos_nuevos_globales[@]} -eq 0 ]; then
+            echo "No se han encontrado discos físicos nuevos sin particiones reconocibles por LVM o con tabla de particiones desconocida."
+        else
+            echo "Discos físicos nuevos detectados sin particiones reconocibles por LVM o con tabla de particiones desconocida."
+            echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
+        fi
     fi
 
     # Retornar el array de discos físicos nuevos
     echo "${discos_nuevos_globales[@]}"
 }
 
-
-# Mostrar información adicional sobre los discos detectados
 function mostrar_informacion_adicional() {
     local nombres_discos_nuevos=("$@")
 
@@ -62,6 +56,7 @@ function mostrar_informacion_adicional() {
         done
     fi
 }
+
 
 # Función para listar particiones expandibles
 function listar_particiones_expandibles() {
@@ -276,205 +271,3 @@ while true; do
 
     read -p "Presione Enter para volver al menú anterior..."
 done
-
-
-Listado:
-El disco no tiene una tabla de particiones reconocible.
-
-de:
-El disco no tiene una tabla de particiones reconocible.
-
-discos:
-El disco no tiene una tabla de particiones reconocible.
-
-físicos::
-El disco no tiene una tabla de particiones reconocible.
-
-NAME:
-El disco no tiene una tabla de particiones reconocible.
-
-SIZE:
-El disco no tiene una tabla de particiones reconocible.
-
-TYPE:
-El disco no tiene una tabla de particiones reconocible.
-
-MOUNTPOINT:
-El disco no tiene una tabla de particiones reconocible.
-
-sda:
-El disco no tiene una tabla de particiones reconocible.
-
-30G:
-El disco no tiene una tabla de particiones reconocible.
-
-disk:
-El disco no tiene una tabla de particiones reconocible.
-
-├─sda1:
-El disco no tiene una tabla de particiones reconocible.
-
-600M:
-El disco no tiene una tabla de particiones reconocible.
-
-part:
-El disco no tiene una tabla de particiones reconocible.
-
-/boot/efi:
-El disco no tiene una tabla de particiones reconocible.
-
-├─sda2:
-El disco no tiene una tabla de particiones reconocible.
-
-1G:
-El disco no tiene una tabla de particiones reconocible.
-
-part:
-El disco no tiene una tabla de particiones reconocible.
-
-/boot:
-El disco no tiene una tabla de particiones reconocible.
-
-└─sda3:
-El disco no tiene una tabla de particiones reconocible.
-
-28.4G:
-El disco no tiene una tabla de particiones reconocible.
-
-part:
-El disco no tiene una tabla de particiones reconocible.
-
-├─vg_rhel_rhel9-root:
-El disco no tiene una tabla de particiones reconocible.
-
-20G:
-El disco no tiene una tabla de particiones reconocible.
-
-lvm:
-El disco no tiene una tabla de particiones reconocible.
-
-/:
-El disco no tiene una tabla de particiones reconocible.
-
-├─vg_rhel_rhel9-swap:
-El disco no tiene una tabla de particiones reconocible.
-
-2G:
-El disco no tiene una tabla de particiones reconocible.
-
-lvm:
-El disco no tiene una tabla de particiones reconocible.
-
-[SWAP]:
-El disco no tiene una tabla de particiones reconocible.
-
-└─vg_rhel_rhel9-home:
-El disco no tiene una tabla de particiones reconocible.
-
-6.4G:
-El disco no tiene una tabla de particiones reconocible.
-
-lvm:
-El disco no tiene una tabla de particiones reconocible.
-
-/home:
-El disco no tiene una tabla de particiones reconocible.
-
-sdb:
-El disco no tiene una tabla de particiones reconocible.
-
-10G:
-El disco no tiene una tabla de particiones reconocible.
-
-disk:
-El disco no tiene una tabla de particiones reconocible.
-
-└─sdb1:
-El disco no tiene una tabla de particiones reconocible.
-
-10G:
-El disco no tiene una tabla de particiones reconocible.
-
-part:
-El disco no tiene una tabla de particiones reconocible.
-
-├─vg_rhel_rhel9_dinamico-var:
-El disco no tiene una tabla de particiones reconocible.
-
-5G:
-El disco no tiene una tabla de particiones reconocible.
-
-lvm:
-El disco no tiene una tabla de particiones reconocible.
-
-/var:
-El disco no tiene una tabla de particiones reconocible.
-
-└─vg_rhel_rhel9_dinamico-tmp:
-El disco no tiene una tabla de particiones reconocible.
-
-5G:
-El disco no tiene una tabla de particiones reconocible.
-
-lvm:
-El disco no tiene una tabla de particiones reconocible.
-
-/tmp:
-El disco no tiene una tabla de particiones reconocible.
-
-sdc:
-El disco no tiene una tabla de particiones reconocible.
-
-1G:
-El disco no tiene una tabla de particiones reconocible.
-
-disk:
-El disco no tiene una tabla de particiones reconocible.
-
-sr0:
-El disco no tiene una tabla de particiones reconocible.
-
-8.9G:
-El disco no tiene una tabla de particiones reconocible.
-
-rom:
-El disco no tiene una tabla de particiones reconocible.
-
-Actualizando:
-El disco no tiene una tabla de particiones reconocible.
-
-información:
-El disco no tiene una tabla de particiones reconocible.
-
-de:
-El disco no tiene una tabla de particiones reconocible.
-
-discos...:
-El disco no tiene una tabla de particiones reconocible.
-
-No:
-El disco no tiene una tabla de particiones reconocible.
-
-se:
-El disco no tiene una tabla de particiones reconocible.
-
-han:
-El disco no tiene una tabla de particiones reconocible.
-
-encontrado:
-El disco no tiene una tabla de particiones reconocible.
-
-discos:
-El disco no tiene una tabla de particiones reconocible.
-
-físicos:
-El disco no tiene una tabla de particiones reconocible.
-
-nuevos:
-El disco no tiene una tabla de particiones reconocible.
-
-sin:
-El disco no tiene una tabla de particiones reconocible.
-
-particiones.:
-El disco no tiene una tabla de particiones reconocible.

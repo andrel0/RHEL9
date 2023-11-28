@@ -50,16 +50,19 @@ function mostrar_informacion_adicional() {
         echo -e "\nInformación adicional sobre los discos físicos nuevos:"
         for disco in "${nombres_discos_nuevos[@]}"; do
             echo -e "\n$disco:"
+            
             # Verificar si el disco tiene una tabla de particiones reconocible
             if parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
+                echo "Información del disco:"
                 parted /dev/$disco print
                 # Puedes agregar más comandos para obtener información adicional
             else
-                echo "El disco no tiene una tabla de particiones reconocible."
+                echo "El disco no tiene una tabla de particiones reconocible o es reconocible por LVM."
             fi
         done
     fi
 }
+
 
 
 # Función para listar particiones expandibles
@@ -275,121 +278,3 @@ while true; do
 
     read -p "Presione Enter para volver al menú anterior..."
 done
-
-Listado:
-El disco no tiene una tabla de particiones reconocible.
-
-de:
-El disco no tiene una tabla de particiones reconocible.
-
-discos:
-El disco no tiene una tabla de particiones reconocible.
-
-físicos:
-El disco no tiene una tabla de particiones reconocible.
-
-sin:
-El disco no tiene una tabla de particiones reconocible.
-
-particiones::
-El disco no tiene una tabla de particiones reconocible.
-
--:
-El disco no tiene una tabla de particiones reconocible.
-
-sdc:
-Error: /dev/sdc: unrecognised disk label
-Model: VMware Virtual disk (scsi)
-Disk /dev/sdc: 1074MB
-Sector size (logical/physical): 512B/512B
-Partition Table: unknown
-Disk Flags:
-
-(Espacio:
-El disco no tiene una tabla de particiones reconocible.
-
-Disponible::
-El disco no tiene una tabla de particiones reconocible.
-
-1073741824:
-El disco no tiene una tabla de particiones reconocible.
-
-bytes):
-El disco no tiene una tabla de particiones reconocible.
-
-Discos:
-El disco no tiene una tabla de particiones reconocible.
-
-físicos:
-El disco no tiene una tabla de particiones reconocible.
-
-nuevos:
-El disco no tiene una tabla de particiones reconocible.
-
-detectados:
-El disco no tiene una tabla de particiones reconocible.
-
-sin:
-El disco no tiene una tabla de particiones reconocible.
-
-particiones:
-El disco no tiene una tabla de particiones reconocible.
-
-reconocibles:
-El disco no tiene una tabla de particiones reconocible.
-
-por:
-El disco no tiene una tabla de particiones reconocible.
-
-LVM:
-El disco no tiene una tabla de particiones reconocible.
-
-o:
-El disco no tiene una tabla de particiones reconocible.
-
-con:
-El disco no tiene una tabla de particiones reconocible.
-
-tabla:
-El disco no tiene una tabla de particiones reconocible.
-
-de:
-El disco no tiene una tabla de particiones reconocible.
-
-particiones:
-El disco no tiene una tabla de particiones reconocible.
-
-desconocida.:
-El disco no tiene una tabla de particiones reconocible.
-
-Nombres:
-El disco no tiene una tabla de particiones reconocible.
-
-de:
-El disco no tiene una tabla de particiones reconocible.
-
-discos:
-El disco no tiene una tabla de particiones reconocible.
-
-físicos:
-El disco no tiene una tabla de particiones reconocible.
-
-nuevos::
-El disco no tiene una tabla de particiones reconocible.
-
-sdc:
-Error: /dev/sdc: unrecognised disk label
-Model: VMware Virtual disk (scsi)
-Disk /dev/sdc: 1074MB
-Sector size (logical/physical): 512B/512B
-Partition Table: unknown
-Disk Flags:
-
-sdc:
-Error: /dev/sdc: unrecognised disk label
-Model: VMware Virtual disk (scsi)
-Disk /dev/sdc: 1074MB
-Sector size (logical/physical): 512B/512B
-Partition Table: unknown
-Disk Flags:
-Presione Enter para volver al menú anterior...^C

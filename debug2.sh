@@ -54,3 +54,100 @@ mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
 # Eliminar archivos temporales
 rm /tmp/*.parted
 
+
+
+./debug3.sh
+
+Información adicional sobre los discos físicos nuevos:
+
+sdc:
+DEBUG: Contenido de /tmp/sdc.parted antes de awk:
+Model: VMware Virtual disk (scsi)
+Disk /dev/sdc: 1074MB
+Sector size (logical/physical): 512B/512B
+Partition Table: unknown
+Disk Flags:
+Partition Table: unknown
+Disk Flags:
+
+DEBUG::
+No existen discos físicos sin tablas de particiones.
+
+Salida:
+No existen discos físicos sin tablas de particiones.
+
+de:
+No existen discos físicos sin tablas de particiones.
+
+parted:
+No existen discos físicos sin tablas de particiones.
+
+para:
+No existen discos físicos sin tablas de particiones.
+
+sdc::
+No existen discos físicos sin tablas de particiones.
+
+:
+No existen discos físicos sin tablas de particiones.
+
+Model::
+No existen discos físicos sin tablas de particiones.
+
+VMware:
+No existen discos físicos sin tablas de particiones.
+
+Virtual:
+No existen discos físicos sin tablas de particiones.
+
+disk:
+No existen discos físicos sin tablas de particiones.
+
+(scsi):
+No existen discos físicos sin tablas de particiones.
+
+Disk:
+No existen discos físicos sin tablas de particiones.
+
+/dev/sdc::
+No existen discos físicos sin tablas de particiones.
+
+1074MB:
+No existen discos físicos sin tablas de particiones.
+
+Sector:
+No existen discos físicos sin tablas de particiones.
+
+size:
+No existen discos físicos sin tablas de particiones.
+
+(logical/physical)::
+No existen discos físicos sin tablas de particiones.
+
+512B/512B:
+No existen discos físicos sin tablas de particiones.
+
+Partition:
+No existen discos físicos sin tablas de particiones.
+
+Table::
+No existen discos físicos sin tablas de particiones.
+
+unknown:
+No existen discos físicos sin tablas de particiones.
+
+Disk:
+No existen discos físicos sin tablas de particiones.
+
+Flags::
+No existen discos físicos sin tablas de particiones.
+
+sdc:
+DEBUG: Contenido de /tmp/sdc.parted antes de awk:
+Model: VMware Virtual disk (scsi)
+Disk /dev/sdc: 1074MB
+Sector size (logical/physical): 512B/512B
+Partition Table: unknown
+Disk Flags:
+Partition Table: unknown
+Disk Flags:

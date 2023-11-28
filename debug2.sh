@@ -37,16 +37,15 @@ function mostrar_informacion_adicional() {
             echo -e "\n$disco:"
             
             # Verificar si el disco tiene una tabla de particiones reconocible
-            if lsblk -o NAME,TYPE | grep -wq "$disco.*disk"; then
+            if parted /dev/$disco print 2>/dev/null | grep -E 'Partition Table: unknown'; then
                 parted /dev/$disco print
                 # Puedes agregar más comandos para obtener información adicional
             else
-                echo "El disco no tiene una tabla de particiones reconocible."
+                echo "No existen discos fisicos sin tablas de particiones."
             fi
         done
     fi
 }
-
 
 # Ejecutar la función principal y obtener los nombres de los discos nuevos
 nombres_discos_nuevos=($(obtener_discos_nuevos))

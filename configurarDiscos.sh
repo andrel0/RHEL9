@@ -11,28 +11,32 @@ function obtener_discos_nuevos() {
     # Limpiar la pantalla
     limpiar_pantalla
 
-    # Mostrar el listado de discos físicos sin particiones
-    echo "Listado de discos físicos sin particiones:"
-    discos_nuevos_disponibles=($(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" && $3 == "" {print $1}'))
+    # Mostrar el listado de discos físicos
+    echo "Listado de discos físicos:"
+    lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
+
+    # Actualizar información de discos
+    echo -e "\nActualizando información de discos..."
+
+    # Obtener la lista de discos físicos nuevos sin particiones
+    local discos_nuevos_disponibles=()
+
+    for disco in $(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'); do
+        # Verificar si el disco tiene una tabla de particiones desconocida o es reconocible por LVM
+        if ! parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
+            espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
+            echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
+            discos_nuevos_disponibles+=("$disco")
+        fi
+    done
 
     if [ ${#discos_nuevos_disponibles[@]} -eq 0 ]; then
-        echo "No se han encontrado discos físicos nuevos sin particiones."
+        echo "No se han encontrado discos físicos nuevos sin particiones reconocibles por LVM o con tablas de particiones desconocidas."
     else
-        for disco in "${discos_nuevos_disponibles[@]}"; do
-            # Verificar si el disco tiene una tabla de particiones reconocible por LVM o desconocida
-            if [ "$(parted /dev/$disco print 2>/dev/null | grep 'Partition Table:')" == "Partition Table: unknown" ] || [ "$(parted /dev/$disco print 2>/dev/null | grep 'Partition Table: gpt\|msdos')" == "" ]; then
-                espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
-                echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
-                discos_nuevos_globales+=("$disco")
-            fi
-        done
-
-        if [ ${#discos_nuevos_globales[@]} -eq 0 ]; then
-            echo "No se han encontrado discos físicos nuevos sin particiones reconocibles por LVM o con tabla de particiones desconocida."
-        else
-            echo "Discos físicos nuevos detectados sin particiones reconocibles por LVM o con tabla de particiones desconocida."
-            echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
-        fi
+        echo "Discos físicos nuevos detectados sin particiones reconocibles por LVM o con tablas de particiones desconocidas:"
+        # Guardar solo los nombres de los discos en el array global
+        discos_nuevos_globales=("${discos_nuevos_disponibles[@]}")
+        echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
     fi
 
     # Retornar el array de discos físicos nuevos

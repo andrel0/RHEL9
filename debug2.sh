@@ -35,8 +35,9 @@ function mostrar_informacion_adicional() {
         echo -e "\nInformación adicional sobre los discos físicos nuevos:"
         for disco in "${nombres_discos_nuevos[@]}"; do
             echo -e "\n$disco:"
+            
             # Verificar si el disco tiene una tabla de particiones reconocible
-            if [ -e "/sys/class/block/$disco/partition" ]; then
+            if lsblk -o NAME,TYPE | grep -wq "$disco.*disk"; then
                 parted /dev/$disco print
                 # Puedes agregar más comandos para obtener información adicional
             else
@@ -45,6 +46,7 @@ function mostrar_informacion_adicional() {
         done
     fi
 }
+
 
 # Ejecutar la función principal y obtener los nombres de los discos nuevos
 nombres_discos_nuevos=($(obtener_discos_nuevos))

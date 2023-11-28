@@ -43,4 +43,3 @@ nombres_discos_nuevos=($(obtener_discos_nuevos))
 
 # Pasar los nombres de los discos nuevos a la función para mostrar información adicional
 mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
-

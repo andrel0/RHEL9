@@ -22,8 +22,8 @@ function obtener_discos_nuevos() {
     local discos_nuevos_disponibles=()
 
     for disco in $(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'); do
-        # Asegúrate de que el disco no tenga particiones
-        if [ -n "$(parted /dev/$disco print 2>/dev/null | grep 'Partition Table: unknown')" ]; then
+        # Asegúrate de que el disco no tenga particiones reconocidas
+        if [ -z "$(parted /dev/$disco print 2>/dev/null | awk '/Partition Table:/ && $3 == "unknown"')" ]; then
             espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
             echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
             discos_nuevos_disponibles+=("$disco")
@@ -35,7 +35,7 @@ function obtener_discos_nuevos() {
     else
         echo "Discos físicos nuevos detectados sin particiones:"
         # Guardar solo los nombres de los discos en el array global
-        discos_nuevos_globales=("${discos_nuevos_disponibles[@]##*/}")
+        discos_nuevos_globales=("${discos_nuevos_disponibles[@]}")
         echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
     fi
 

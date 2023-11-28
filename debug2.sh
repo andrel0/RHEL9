@@ -31,8 +31,9 @@ function mostrar_informacion_adicional() {
             
             # Verificar si el disco tiene una tabla de particiones reconocible
             if [ -e "/tmp/$disco.parted" ]; then
-                cat "/tmp/$disco.parted" | tail -n +6  # Mostrar desde la línea 6 en adelante
-                # Puedes agregar más comandos para obtener información adicional
+                # Mostrar la información a partir de la línea que contiene "Model:"
+                awk '/Model:/{flag=1; next} flag' "/tmp/$disco.parted"
+                # Puedes ajustar esto según la salida específica que deseas mostrar
             else
                 echo "No existen discos físicos sin tablas de particiones."
             fi

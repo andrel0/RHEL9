@@ -35,8 +35,8 @@ function mostrar_informacion_adicional() {
             if [ -e "/tmp/$disco.parted" ]; then
                 echo "DEBUG: Contenido de /tmp/$disco.parted antes de awk:"
                 cat "/tmp/$disco.parted"
-                # Mostrar la información a partir de la línea que contiene "Model:"
-                awk '/Model:/{flag=1; next} flag' "/tmp/$disco.parted"
+                # Mostrar la información relevante entre "Model:" y "Disk Flags:"
+                awk '/Model:/{model_found=1} /Partition Table:/{table_found=1} model_found && table_found {print} model_found && /Disk Flags:/{model_found=0; table_found=0}' "/tmp/$disco.parted"
                 # Puedes ajustar esto según la salida específica que deseas mostrar
             else
                 echo "No existen discos físicos sin tablas de particiones."
@@ -53,111 +53,4 @@ mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
 
 # Eliminar archivos temporales
 rm /tmp/*.parted
-
-
-
-
-
-
-
-
-[root@rhel9 ~]# ./debug3.sh
-
-Información adicional sobre los discos físicos nuevos:
-
-sdc:
-DEBUG: Contenido de /tmp/sdc.parted antes de awk:
-Model: VMware Virtual disk (scsi)
-Disk /dev/sdc: 1074MB
-Sector size (logical/physical): 512B/512B
-Partition Table: unknown
-Disk Flags:
-Disk /dev/sdc: 1074MB
-Sector size (logical/physical): 512B/512B
-Partition Table: unknown
-Disk Flags:
-
-DEBUG::
-No existen discos físicos sin tablas de particiones.
-
-Salida:
-No existen discos físicos sin tablas de particiones.
-
-de:
-No existen discos físicos sin tablas de particiones.
-
-parted:
-No existen discos físicos sin tablas de particiones.
-
-para:
-No existen discos físicos sin tablas de particiones.
-
-sdc::
-No existen discos físicos sin tablas de particiones.
-
-:
-No existen discos físicos sin tablas de particiones.
-
-Model::
-No existen discos físicos sin tablas de particiones.
-
-VMware:
-No existen discos físicos sin tablas de particiones.
-
-Virtual:
-No existen discos físicos sin tablas de particiones.
-
-disk:
-No existen discos físicos sin tablas de particiones.
-
-(scsi):
-No existen discos físicos sin tablas de particiones.
-
-Disk:
-No existen discos físicos sin tablas de particiones.
-
-/dev/sdc::
-No existen discos físicos sin tablas de particiones.
-
-1074MB:
-No existen discos físicos sin tablas de particiones.
-
-Sector:
-No existen discos físicos sin tablas de particiones.
-
-size:
-No existen discos físicos sin tablas de particiones.
-
-(logical/physical)::
-No existen discos físicos sin tablas de particiones.
-
-512B/512B:
-No existen discos físicos sin tablas de particiones.
-
-Partition:
-No existen discos físicos sin tablas de particiones.
-
-Table::
-No existen discos físicos sin tablas de particiones.
-
-unknown:
-No existen discos físicos sin tablas de particiones.
-
-Disk:
-No existen discos físicos sin tablas de particiones.
-
-Flags::
-No existen discos físicos sin tablas de particiones.
-
-sdc:
-DEBUG: Contenido de /tmp/sdc.parted antes de awk:
-Model: VMware Virtual disk (scsi)
-Disk /dev/sdc: 1074MB
-Sector size (logical/physical): 512B/512B
-Partition Table: unknown
-Disk Flags:
-Disk /dev/sdc: 1074MB
-Sector size (logical/physical): 512B/512B
-Partition Table: unknown
-Disk Flags:
 

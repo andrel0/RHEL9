@@ -276,3 +276,205 @@ while true; do
 
     read -p "Presione Enter para volver al menú anterior..."
 done
+
+
+Listado:
+El disco no tiene una tabla de particiones reconocible.
+
+de:
+El disco no tiene una tabla de particiones reconocible.
+
+discos:
+El disco no tiene una tabla de particiones reconocible.
+
+físicos::
+El disco no tiene una tabla de particiones reconocible.
+
+NAME:
+El disco no tiene una tabla de particiones reconocible.
+
+SIZE:
+El disco no tiene una tabla de particiones reconocible.
+
+TYPE:
+El disco no tiene una tabla de particiones reconocible.
+
+MOUNTPOINT:
+El disco no tiene una tabla de particiones reconocible.
+
+sda:
+El disco no tiene una tabla de particiones reconocible.
+
+30G:
+El disco no tiene una tabla de particiones reconocible.
+
+disk:
+El disco no tiene una tabla de particiones reconocible.
+
+├─sda1:
+El disco no tiene una tabla de particiones reconocible.
+
+600M:
+El disco no tiene una tabla de particiones reconocible.
+
+part:
+El disco no tiene una tabla de particiones reconocible.
+
+/boot/efi:
+El disco no tiene una tabla de particiones reconocible.
+
+├─sda2:
+El disco no tiene una tabla de particiones reconocible.
+
+1G:
+El disco no tiene una tabla de particiones reconocible.
+
+part:
+El disco no tiene una tabla de particiones reconocible.
+
+/boot:
+El disco no tiene una tabla de particiones reconocible.
+
+└─sda3:
+El disco no tiene una tabla de particiones reconocible.
+
+28.4G:
+El disco no tiene una tabla de particiones reconocible.
+
+part:
+El disco no tiene una tabla de particiones reconocible.
+
+├─vg_rhel_rhel9-root:
+El disco no tiene una tabla de particiones reconocible.
+
+20G:
+El disco no tiene una tabla de particiones reconocible.
+
+lvm:
+El disco no tiene una tabla de particiones reconocible.
+
+/:
+El disco no tiene una tabla de particiones reconocible.
+
+├─vg_rhel_rhel9-swap:
+El disco no tiene una tabla de particiones reconocible.
+
+2G:
+El disco no tiene una tabla de particiones reconocible.
+
+lvm:
+El disco no tiene una tabla de particiones reconocible.
+
+[SWAP]:
+El disco no tiene una tabla de particiones reconocible.
+
+└─vg_rhel_rhel9-home:
+El disco no tiene una tabla de particiones reconocible.
+
+6.4G:
+El disco no tiene una tabla de particiones reconocible.
+
+lvm:
+El disco no tiene una tabla de particiones reconocible.
+
+/home:
+El disco no tiene una tabla de particiones reconocible.
+
+sdb:
+El disco no tiene una tabla de particiones reconocible.
+
+10G:
+El disco no tiene una tabla de particiones reconocible.
+
+disk:
+El disco no tiene una tabla de particiones reconocible.
+
+└─sdb1:
+El disco no tiene una tabla de particiones reconocible.
+
+10G:
+El disco no tiene una tabla de particiones reconocible.
+
+part:
+El disco no tiene una tabla de particiones reconocible.
+
+├─vg_rhel_rhel9_dinamico-var:
+El disco no tiene una tabla de particiones reconocible.
+
+5G:
+El disco no tiene una tabla de particiones reconocible.
+
+lvm:
+El disco no tiene una tabla de particiones reconocible.
+
+/var:
+El disco no tiene una tabla de particiones reconocible.
+
+└─vg_rhel_rhel9_dinamico-tmp:
+El disco no tiene una tabla de particiones reconocible.
+
+5G:
+El disco no tiene una tabla de particiones reconocible.
+
+lvm:
+El disco no tiene una tabla de particiones reconocible.
+
+/tmp:
+El disco no tiene una tabla de particiones reconocible.
+
+sdc:
+El disco no tiene una tabla de particiones reconocible.
+
+1G:
+El disco no tiene una tabla de particiones reconocible.
+
+disk:
+El disco no tiene una tabla de particiones reconocible.
+
+sr0:
+El disco no tiene una tabla de particiones reconocible.
+
+8.9G:
+El disco no tiene una tabla de particiones reconocible.
+
+rom:
+El disco no tiene una tabla de particiones reconocible.
+
+Actualizando:
+El disco no tiene una tabla de particiones reconocible.
+
+información:
+El disco no tiene una tabla de particiones reconocible.
+
+de:
+El disco no tiene una tabla de particiones reconocible.
+
+discos...:
+El disco no tiene una tabla de particiones reconocible.
+
+No:
+El disco no tiene una tabla de particiones reconocible.
+
+se:
+El disco no tiene una tabla de particiones reconocible.
+
+han:
+El disco no tiene una tabla de particiones reconocible.
+
+encontrado:
+El disco no tiene una tabla de particiones reconocible.
+
+discos:
+El disco no tiene una tabla de particiones reconocible.
+
+físicos:
+El disco no tiene una tabla de particiones reconocible.
+
+nuevos:
+El disco no tiene una tabla de particiones reconocible.
+
+sin:
+El disco no tiene una tabla de particiones reconocible.
+
+particiones.:
+El disco no tiene una tabla de particiones reconocible.

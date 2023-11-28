@@ -1,15 +1,8 @@
 #!/bin/bash
 
-# Función para limpiar la pantalla
-function limpiar_pantalla() {
-    clear
-}
-
 # Función para obtener discos nuevos sin particiones reconocibles
 function obtener_discos_nuevos() {
     local discos_nuevos_globales=()
-
-    limpiar_pantalla
 
     echo "Listado de discos físicos sin particiones reconocibles por LVM o con tabla de particiones desconocida:"
     discos_nuevos_disponibles=($(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" && $3 == "" {print $1}'))
@@ -42,26 +35,7 @@ function mostrar_informacion_adicional() {
     fi
 }
 
-# Menú de opciones
-while true; do
-    echo -e "\nMenú:"
-    echo "1. Obtener discos nuevos sin particiones reconocibles"
-    echo "2. Salir"
-
-    read -p "Seleccione una opción: " opcion
-
-    case $opcion in
-        1)
-            nombres_discos_nuevos=($(obtener_discos_nuevos))
-            mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
-            ;;
-        2)
-            echo "Saliendo del script."
-            exit 0
-            ;;
-        *)
-            echo "Opción no válida. Por favor, seleccione una opción válida."
-            ;;
-    esac
-done
+# Ejecutar la función principal
+nombres_discos_nuevos=($(obtener_discos_nuevos))
+mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
 

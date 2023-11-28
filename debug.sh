@@ -16,3 +16,9 @@ function obtener_discos_nuevos() {
 
 # Ejecutar la función principal
 obtener_discos_nuevos
+
+
+./debug.sh
+Listado de discos físicos sin particiones reconocibles por LVM o con tabla de particiones desconocida:
+Discos físicos nuevos detectados sin particiones reconocibles por LVM o con tabla de particiones desconocida:
+Nombres de discos físicos nuevos: sda sdb sdc

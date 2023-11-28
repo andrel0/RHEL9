@@ -31,7 +31,7 @@ function mostrar_informacion_adicional() {
             
             # Verificar si el disco tiene una tabla de particiones reconocible
             if [ -e "/tmp/$disco.parted" ]; then
-                sed '1,5d' "/tmp/$disco.parted"  # Eliminar las primeras 5 líneas
+                cat "/tmp/$disco.parted" #| tail -n +2  para mostrar desde la línea 2 en adelante
                 # Puedes agregar más comandos para obtener información adicional
             else
                 echo "No existen discos físicos sin tablas de particiones."
@@ -46,5 +46,5 @@ nombres_discos_nuevos=($(obtener_discos_nuevos))
 # Pasar los nombres de los discos nuevos a la función para mostrar información adicional
 mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
 
-# Pasar los nombres de los discos nuevos a la función para mostrar información adicional
-mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
+# Eliminar archivos temporales
+rm /tmp/*.parted

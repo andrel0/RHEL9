@@ -37,19 +37,20 @@ function mostrar_informacion_adicional() {
             echo -e "\n$disco:"
             
             # Verificar si el disco tiene una tabla de particiones reconocible
-            if parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
+            if parted /dev/$disco print 2>/dev/null | grep -E 'Partition Table: unknown'; then
+                echo "DEBUG: Se detectó una tabla de particiones desconocida"
                 parted /dev/$disco print
                 # Puedes agregar más comandos para obtener información adicional
             else
-                echo "El disco no tiene una tabla de particiones reconocible."
+                echo "DEBUG: No se detectó una tabla de particiones desconocida."
             fi
         done
     fi
 }
-
 
 # Ejecutar la función principal y obtener los nombres de los discos nuevos
 nombres_discos_nuevos=($(obtener_discos_nuevos))
 
 # Pasar los nombres de los discos nuevos a la función para mostrar información adicional
 mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
+

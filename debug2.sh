@@ -31,7 +31,7 @@ function mostrar_informacion_adicional() {
             
             # Verificar si el disco tiene una tabla de particiones reconocible
             if [ -e "/tmp/$disco.parted" ]; then
-                cat "/tmp/$disco.parted" #| tail -n +2  para mostrar desde la línea 2 en adelante
+                cat "/tmp/$disco.parted" | tail -n +6  # Mostrar desde la línea 6 en adelante
                 # Puedes agregar más comandos para obtener información adicional
             else
                 echo "No existen discos físicos sin tablas de particiones."

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Desvincular las variables globales al inicio del script
+unset nombres_discos_nuevos
+
 function obtener_discos_nuevos() {
     local discos_nuevos_disponibles=()
 

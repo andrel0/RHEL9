@@ -5,11 +5,15 @@ function obtener_discos_nuevos() {
 
     echo "Listado de discos físicos sin particiones reconocibles por LVM o con tabla de particiones desconocida:"
 
-    for disco in $(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" && $3 == "" {print $1}'); do
-        # Verificar si el disco tiene una tabla de particiones desconocida o es reconocible por LVM
-        if ! parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
-            echo "- $disco"
-            discos_nuevos_disponibles+=("$disco")
+    # Iterar sobre discos físicos
+    for disco in $(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" {print $1}'); do
+        # Verificar si el disco tiene particiones reconocibles
+        if [ -z "$(lsblk -rno NAME,MOUNTPOINT /dev/${disco}[0-9] 2>/dev/null)" ]; then
+            # Verificar si el disco tiene una tabla de particiones desconocida o es reconocible por LVM
+            if ! parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
+                echo "- $disco"
+                discos_nuevos_disponibles+=("$disco")
+            fi
         fi
     done
 
@@ -23,4 +27,3 @@ function obtener_discos_nuevos() {
 
 # Ejecutar la función principal
 obtener_discos_nuevos
-

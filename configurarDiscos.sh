@@ -26,7 +26,7 @@ function obtener_discos_nuevos() {
         if [ -n "$(parted /dev/$disco print 2>/dev/null | grep 'Partition Table: unknown')" ]; then
             espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
             echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
-            discos_nuevos_disponibles+=($disco)
+            discos_nuevos_disponibles+=("$disco")
         fi
     done
 

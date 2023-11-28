@@ -13,8 +13,6 @@ function obtener_discos_nuevos() {
                 discos_nuevos_disponibles+=("$disco")
                 # Redirigir la salida de parted al archivo en /tmp
                 parted /dev/$disco print 2>/dev/null > "/tmp/$disco.parted"
-                echo "DEBUG: Salida de parted para $disco:"
-                cat "/tmp/$disco.parted"
             fi
         fi
     done < <(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" {print $1}')
@@ -33,10 +31,8 @@ function mostrar_informacion_adicional() {
             
             # Verificar si el disco tiene una tabla de particiones reconocible
             if [ -e "/tmp/$disco.parted" ]; then
-                echo "DEBUG: Contenido de /tmp/$disco.parted antes de awk:"
-                cat "/tmp/$disco.parted"
                 # Mostrar la información relevante entre "Model:" y "Disk Flags:"
-                awk '/Model:/{model_found=1} /Disk Flags:/{print; model_found=0} model_found && !/Disk Flags:/{print}'
+                awk '/Model:/{model_found=1} /Disk Flags:/{print; model_found=0} model_found && !/Disk Flags:/{print}' "/tmp/$disco.parted"
                 # Puedes ajustar esto según la salida específica que deseas mostrar
             else
                 echo "No existen discos físicos sin tablas de particiones."

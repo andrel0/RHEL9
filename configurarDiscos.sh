@@ -52,8 +52,13 @@ function mostrar_informacion_adicional() {
         echo -e "\nInformación adicional sobre los discos físicos nuevos:"
         for disco in "${nombres_discos_nuevos[@]}"; do
             echo -e "\n$disco:"
-            parted /dev/$disco print
-            # Puedes agregar más comandos para obtener información adicional
+            # Verificar si el disco tiene una tabla de particiones reconocible
+            if [ -e "/sys/class/block/$disco/partition" ]; then
+                parted /dev/$disco print
+                # Puedes agregar más comandos para obtener información adicional
+            else
+                echo "El disco no tiene una tabla de particiones reconocible."
+            fi
         done
     fi
 }

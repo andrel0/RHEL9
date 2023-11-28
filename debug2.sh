@@ -31,7 +31,7 @@ function mostrar_informacion_adicional() {
             
             # Verificar si el disco tiene una tabla de particiones reconocible
             if [ -e "/tmp/$disco.parted" ]; then
-                cat "/tmp/$disco.parted"
+                cat "/tmp/$disco.parted" | sed '1,5d'  # Eliminar las primeras 5 líneas
                 # Puedes agregar más comandos para obtener información adicional
             else
                 echo "No existen discos fisicos sin tablas de particiones."

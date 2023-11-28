@@ -11,6 +11,8 @@ function obtener_discos_nuevos() {
             if parted_output=$(parted /dev/$disco print 2>/dev/null | grep -E 'Partition Table: unknown'); then
                 echo "$disco"
                 discos_nuevos_disponibles+=("$disco")
+                # Redirigir la salida de parted al archivo en /tmp
+                parted /dev/$disco print 2>/dev/null > /tmp/$disco.parted
             fi
         fi
     done
@@ -28,8 +30,8 @@ function mostrar_informacion_adicional() {
             echo -e "\n$disco:"
             
             # Verificar si el disco tiene una tabla de particiones reconocible
-            if parted_output=$(parted /dev/$disco print 2>/dev/null | awk '/Number.*Start.*End.*Size.*Type/{getline; print}'); then
-                echo "$parted_output"
+            if [ -e "/tmp/$disco.parted" ]; then
+                cat "/tmp/$disco.parted"
                 # Puedes agregar más comandos para obtener información adicional
             else
                 echo "No existen discos fisicos sin tablas de particiones."

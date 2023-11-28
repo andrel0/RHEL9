@@ -21,12 +21,12 @@ function obtener_discos_nuevos() {
     # Obtener la lista de discos físicos nuevos sin particiones
     local discos_nuevos_disponibles=()
 
-    for disco in $(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'); do
-        # Verificar si el disco tiene una tabla de particiones desconocida
-        if ! parted /dev/$disco print 2>/dev/null | grep -q 'Partition Table: unknown'; then
-            espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
-            echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
-            discos_nuevos_disponibles+=("$disco")
+    for disco in /sys/class/block/sd*; do
+        # Verificar si el disco tiene particiones reconocibles
+        if [ ! -d "$disco"/[a-z]* ]; then
+            espacio_disponible=$(lsblk -o SIZE -b -n /dev/$(basename $disco))
+            echo "- $(basename $disco) (Espacio Disponible: $espacio_disponible bytes)"
+            discos_nuevos_disponibles+=("$(basename $disco)")
         fi
     done
 

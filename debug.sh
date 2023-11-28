@@ -9,8 +9,8 @@ function obtener_discos_nuevos() {
     for disco in $(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" {print $1}'); do
         # Verificar si el disco tiene particiones reconocibles
         if [ -z "$(lsblk -rno NAME,MOUNTPOINT /dev/${disco}[0-9] 2>/dev/null)" ]; then
-            # Verificar si el disco tiene una tabla de particiones desconocida o es reconocible por LVM
-            if ! parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
+            # Verificar si el disco tiene una tabla de particiones desconocida y no es reconocible por LVM
+            if parted_output=$(parted /dev/$disco print 2>/dev/null | grep -E 'Partition Table: unknown' | grep -v 'Flags'); then
                 echo "- $disco"
                 discos_nuevos_disponibles+=("$disco")
             fi

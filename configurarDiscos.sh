@@ -87,9 +87,12 @@ function listar_particiones_expandibles() {
 }
 
 expandir_particion() {
+
     # Escanear los discos físicos para detectar cambios
     echo "Escaneando discos físicos..."
     partprobe
+    rescan-scsi-bus.sh
+    echo "- - -" > /sys/class/scsi_host/host*/scan
 
     # Escanear para detectar nuevos VGs
     echo "Escaneando Volume Groups (VGs)..."
@@ -98,7 +101,13 @@ expandir_particion() {
     # Mostrar información sobre los discos físicos y su espacio disponible
     echo -e "Información sobre los discos físicos y espacio disponible:"
     lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
-
+    
+    # Solicitar confirmación antes de realizar cambios
+    read -p "¿Está seguro de que desea expandir un Volume Group (VG) y un Logical Volume (LV)? (s/n): " confirmacion
+    if [ "$confirmacion" != "s" ]; then
+        echo "Operación cancelada."
+        return
+    fi
     # Obtener la lista de VGs existentes
     vgs_list=($(vgs --noheadings -o vg_name))
     
@@ -129,17 +138,20 @@ expandir_particion() {
                     # Mostrar información actual del LV
                     lvdisplay /dev/$nombre_vg/$nombre_lv
 
-                    # Solicitar la cantidad de espacio adicional en MB
-                    read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_lv: " espacio_mb
+                    # Solicitar el porcentaje del espacio adicional
+                    read -p "Ingrese el porcentaje del espacio adicional para $nombre_lv (por ejemplo, 50%): " porcentaje
 
                     # Extender el VG con el espacio disponible
                     vgextend $nombre_vg $disco
 
-                    # Extender el LV y su filesystem
-                    lvextend -l +100%FREE /dev/$nombre_vg/$nombre_lv
+                    # Extender el LV con el porcentaje especificado y su filesystem
+                    lvextend -l +$porcentaje%FREE /dev/$nombre_vg/$nombre_lv
                     resize2fs /dev/$nombre_vg/$nombre_lv
 
-                    echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
+                    # Actualizar la tabla de particiones
+                    partprobe
+
+                    echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $porcentaje% del espacio disponible en el disco $disco."
 
                     # Salir del script después de la expansión
                     return
@@ -152,6 +164,7 @@ expandir_particion() {
         fi
     done
 }
+
     
 crear_particion_lvm() {
     # Crear una partición LVM en el disco seleccionado

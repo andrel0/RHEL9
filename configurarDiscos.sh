@@ -97,6 +97,12 @@ expandir_particion() {
         read -p "¿Desea generar un nuevo Volume Group (VG) o asignar un disco físico a un VG existente? (s/n): " respuesta
 
         if [ "$respuesta" = "s" ]; then
+            # Llamar a la función para obtener los discos nuevos
+            nombres_discos_nuevos=($(obtener_discos_nuevos))
+            
+            # Mostrar la información adicional sobre los discos físicos nuevos
+            mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
+
             # Seleccionar o crear un Volume Group (VG)
             PS3="Seleccione el número del disco para crear o seleccionar un Volume Group (VG): "
             select disco in "${discos_disponibles[@]}"; do

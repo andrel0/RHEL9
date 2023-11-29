@@ -49,6 +49,3 @@ mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
 
 # Eliminar archivos temporales
 rm /tmp/*.parted
-
-nombres_discos_nuevos=($(obtener_discos_nuevos))
-mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"

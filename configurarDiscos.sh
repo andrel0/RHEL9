@@ -91,10 +91,15 @@ expandir_particion() {
     echo "Escaneando discos físicos..."
     partprobe
 
+    # Escanear para detectar nuevos VGs
+    echo "Escaneando Volume Groups (VGs)..."
+    vgscan
+
     # Mostrar información sobre los discos físicos y su espacio disponible
     echo -e "Información sobre los discos físicos y espacio disponible:"
     lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
-    
+
+    # Obtener la lista de VGs existentes
     vgs_list=($(vgs --noheadings -o vg_name))
     
     if [ ${#vgs_list[@]} -eq 0 ]; then
@@ -127,11 +132,17 @@ expandir_particion() {
                     # Solicitar la cantidad de espacio adicional en MB
                     read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_lv: " espacio_mb
 
+                    # Extender el VG con el espacio disponible
+                    vgextend $nombre_vg $disco
+
                     # Extender el LV y su filesystem
-                    lvextend -L +${espacio_mb}M /dev/$nombre_vg/$nombre_lv
+                    lvextend -l +100%FREE /dev/$nombre_vg/$nombre_lv
                     resize2fs /dev/$nombre_vg/$nombre_lv
+
                     echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
-                    break
+
+                    # Salir del script después de la expansión
+                    return
                 else
                     echo "Opción no válida. Intente de nuevo."
                 fi

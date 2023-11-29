@@ -95,7 +95,52 @@ expandir_particion() {
     echo -e "Información sobre los discos físicos y espacio disponible:"
     lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
     
-   vgs_list=(
+    vgs_list=($(vgs --noheadings -o vg_name))
+    
+    if [ ${#vgs_list[@]} -eq 0 ]; then
+        echo "No se encontraron Volume Groups (VGs) existentes."
+        return
+    fi
+
+    # Permitir al usuario seleccionar el VG para expandir
+    PS3="Seleccione el número del Volume Group (VG) que desea expandir: "
+    select nombre_vg in "${vgs_list[@]}"; do
+        if [ -n "$nombre_vg" ]; then
+            # Obtener la lista de LVs asociados al VG seleccionado
+            lv_list=($(lvs --noheadings -o lv_name /dev/$nombre_vg))
+
+            if [ ${#lv_list[@]} -eq 0 ]; then
+                echo "No se encontraron Logical Volumes (LVs) en el Volume Group (VG) $nombre_vg."
+                return
+            fi
+
+            # Permitir al usuario seleccionar el LV para expandir
+            PS3="Seleccione el número del Logical Volume (LV) que desea expandir: "
+            select nombre_lv in "${lv_list[@]}"; do
+                if [ -n "$nombre_lv" ]; then
+                    # Obtener el disco asociado al LV seleccionado
+                    disco=$(lvdisplay --noheadings -C -o devices /dev/$nombre_vg/$nombre_lv)
+
+                    # Mostrar información actual del LV
+                    lvdisplay /dev/$nombre_vg/$nombre_lv
+
+                    # Solicitar la cantidad de espacio adicional en MB
+                    read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_lv: " espacio_mb
+
+                    # Extender el LV y su filesystem
+                    lvextend -L +${espacio_mb}M /dev/$nombre_vg/$nombre_lv
+                    resize2fs /dev/$nombre_vg/$nombre_lv
+                    echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
+                    break
+                else
+                    echo "Opción no válida. Intente de nuevo."
+                fi
+            done
+        else
+            echo "Opción no válida. Intente de nuevo."
+        fi
+    done
+}
     
 
     # Permitir al usuario seleccionar el disco físico para expandir

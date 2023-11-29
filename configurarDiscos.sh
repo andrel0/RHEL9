@@ -94,7 +94,10 @@ expandir_particion() {
     mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
 
     # Obtener la lista de discos físicos sin particiones LVM
-    discos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && !($1 in nombres_discos_nuevos) {print $1}'))
+    discos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'))
+
+    # Filtrar discos que no están en la lista de discos nuevos
+    discos_disponibles=($(comm -23 <(printf "%s\n" "${discos_disponibles[@]}" | sort) <(printf "%s\n" "${nombres_discos_nuevos[@]}" | sort)))
 
     if [ ${#discos_disponibles[@]} -eq 0 ]; then
         echo "No hay discos físicos disponibles sin particiones LVM."
@@ -116,15 +119,6 @@ expandir_particion() {
                         # Crear un nuevo VG
                         vgcreate $nombre_vg $disco
                         echo "Creando el nuevo Volume Group (VG): $nombre_vg en el disco $disco"
-                    fi
-
-                    # Listar los LV dentro del VG
-                    lv_list=($(lvdisplay | awk -v vg="$nombre_vg" '/LV Path/ && $0 ~ vg {print $3}'))
-
-                    # Verificar si hay LV dentro del VG
-                    if [ ${#lv_list[@]} -eq 0 ]; then
-                        echo "No hay Logical Volumes (LV) en el Volume Group (VG) $nombre_vg para expandir."
-                        return
                     fi
 
                     # Solicitar al usuario que seleccione el LV

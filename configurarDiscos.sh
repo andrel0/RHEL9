@@ -142,33 +142,6 @@ expandir_particion() {
     done
 }
     
-
-    # Permitir al usuario seleccionar el disco físico para expandir
-    PS3="Seleccione el número del disco físico que desea expandir: "
-    select disco in "${discos_lvm[@]}"; do
-        if [ -n "$disco" ]; then
-            # Obtener el VG y LV asociados al disco seleccionado
-            nombre_vg=$(lvs --noheadings -o vg_name /dev/$disco | uniq)
-            nombre_lv=$(lvs --noheadings -o lv_name /dev/$disco | uniq)
-
-            # Mostrar información actual del LV
-            lvdisplay /dev/$nombre_vg/$nombre_lv
-
-            # Solicitar la cantidad de espacio adicional en MB
-            read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_lv: " espacio_mb
-
-            # Extender el LV y su filesystem
-            lvextend -L +${espacio_mb}M /dev/$nombre_vg/$nombre_lv
-            resize2fs /dev/$nombre_vg/$nombre_lv
-            echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
-            break
-        else
-            echo "Opción no válida. Intente de nuevo."
-        fi
-    done
-}
-
-
 crear_particion_lvm() {
     # Crear una partición LVM en el disco seleccionado
     echo "Creando una partición LVM en el disco seleccionado..."

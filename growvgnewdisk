@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# Función para reescanear discos
+reescanear_discos() {
+    echo "Reescaneando discos..."
+    echo "----------------------------------------"
+    rescan-scsi-bus.sh
+    echo "----------------------------------------"
+}
+
+# Función para listar los Volume Groups (VG)
+listar_vgs() {
+    echo "Listando Volume Groups (VG) disponibles:"
+    echo "----------------------------------------"
+    vgs
+    echo "----------------------------------------"
+}
+
+# Función para listar discos físicos disponibles para agregar a un VG
+listar_discos_disponibles() {
+    echo "Listando discos físicos disponibles para agregar al Volume Group (VG):"
+    echo "----------------------------------------"
+    pvs
+    echo "----------------------------------------"
+}
+
+# Función para agregar un disco a un VG
+agregar_disco_a_vg() {
+    listar_vgs
+    read -p "Ingresa el nombre del Volume Group (VG) al que deseas agregar el disco: " vg_nombre
+
+    listar_discos_disponibles
+    read -p "Ingresa el nombre del disco físico que deseas agregar al VG: " disco_nombre
+
+    vgextend $vg_nombre $disco_nombre
+    echo "Disco agregado al Volume Group (VG) $vg_nombre."
+}
+
+# Función para listar Logical Volumes (LV) en un VG
+listar_lvs_en_vg() {
+    listar_vgs
+    read -p "Ingresa el nombre del Volume Group (VG) del que deseas listar los Logical Volumes (LV): " vg_nombre
+
+    echo "Listando Logical Volumes (LV) en el Volume Group (VG) $vg_nombre:"
+    echo "----------------------------------------"
+    lvs $vg_nombre
+    echo "----------------------------------------"
+}
+
+# Función para expandir un LV al 100% del espacio libre disponible
+expandir_lv() {
+    listar_lvs_en_vg
+    read -p "Ingresa el nombre del Logical Volume (LV) que deseas expandir: " lv_nombre
+
+    lvextend -l +100%FREE /dev/$vg_nombre/$lv_nombre
+    resize2fs /dev/$vg_nombre/$lv_nombre
+    echo "Logical Volume (LV) $lv_nombre expandido al 100% del espacio libre disponible."
+}
+
+# Menú principal
+while true; do
+    echo "----------------------------------------"
+    echo "1. Reescanear discos"
+    echo "2. Listar Volume Groups (VG)"
+    echo "3. Agregar disco a Volume Group (VG)"
+    echo "4. Listar Logical Volumes (LV) en un VG"
+    echo "5. Expandir Logical Volume (LV)"
+    echo "6. Salir"
+    echo "----------------------------------------"
+    read -p "Selecciona una opción: " opcion
+
+    case $opcion in
+        1) reescanear_discos ;;
+        2) listar_vgs ;;
+        3) agregar_disco_a_vg ;;
+        4) listar_lvs_en_vg ;;
+        5) expandir_lv ;;
+        6) echo "Saliendo del script. ¡Hasta luego!"; exit ;;
+        *) echo "Opción no válida. Por favor, selecciona una opción válida." ;;
+    esac
+done

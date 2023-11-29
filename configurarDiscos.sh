@@ -94,22 +94,9 @@ expandir_particion() {
     # Mostrar información sobre los discos físicos y su espacio disponible
     echo -e "Información sobre los discos físicos y espacio disponible:"
     lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
-
-    # Obtener la lista de discos físicos con particiones LVM
-    discos_lvm=($(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'))
-
-    if [ ${#discos_lvm[@]} -eq 0 ]; then
-        echo "No se encontraron discos físicos con particiones LVM."
-        return
-    fi
-
-    # Filtrar discos que están en la lista de discos nuevos
-    discos_lvm=($(comm -12 <(printf "%s\n" "${discos_lvm[@]}" | sort) <(printf "%s\n" "${nombres_discos_nuevos[@]}" | sort)))
-
-    if [ ${#discos_lvm[@]} -eq 0 ]; then
-        echo "No se encontraron discos físicos disponibles para expandir."
-        return
-    fi
+    
+   vgs_list=(
+    
 
     # Permitir al usuario seleccionar el disco físico para expandir
     PS3="Seleccione el número del disco físico que desea expandir: "

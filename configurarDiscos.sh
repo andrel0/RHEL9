@@ -1,46 +1,28 @@
 #!/bin/bash
 
-limpiar_pantalla() {
-    clear
+function limpiar_pantalla() {
+        clear
 }
 
 function obtener_discos_nuevos() {
-    # Declaración de variables local
-    local discos_nuevos_globales=()
-
-    # Limpiar la pantalla
-    limpiar_pantalla
-
-    # Mostrar el listado de discos físicos
-    echo "Listado de discos físicos:"
-    lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
-
-    # Actualizar información de discos
-    echo -e "\nActualizando información de discos..."
-
-    # Obtener la lista de discos físicos nuevos sin particiones
     local discos_nuevos_disponibles=()
 
-    for disco in $(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'); do
-        # Verificar si el disco tiene una tabla de particiones desconocida o es reconocible por LVM
-        if ! parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
-            espacio_disponible=$(lsblk -o SIZE -b -n /dev/$disco)
-            echo "- $disco (Espacio Disponible: $espacio_disponible bytes)"
-            discos_nuevos_disponibles+=("$disco")
+    # Iterar sobre discos físicos
+    while IFS= read -r disco; do
+        # Verificar si el disco tiene particiones reconocibles
+        if [ -z "$(lsblk -rno NAME,MOUNTPOINT /dev/${disco}[0-9] 2>/dev/null)" ]; then
+            # Verificar si el disco tiene una tabla de particiones desconocida y no es reconocible por LVM
+            if parted_output=$(parted /dev/$disco print 2>/dev/null | grep -E 'Partition Table: unknown'); then
+                echo "$disco"
+                discos_nuevos_disponibles+=("$disco")
+                # Redirigir la salida de parted al archivo en /tmp
+                parted /dev/$disco print 2>/dev/null > "/tmp/$disco.parted"
+            fi
         fi
-    done
-
-    if [ ${#discos_nuevos_disponibles[@]} -eq 0 ]; then
-        echo "No se han encontrado discos físicos nuevos sin particiones reconocibles por LVM o con tablas de particiones desconocidas."
-    else
-        echo "Discos físicos nuevos detectados sin particiones reconocibles por LVM o con tablas de particiones desconocidas:"
-        # Guardar solo los nombres de los discos en el array global
-        discos_nuevos_globales=("${discos_nuevos_disponibles[@]}")
-        echo "Nombres de discos físicos nuevos: ${discos_nuevos_globales[@]}"
-    fi
+    done < <(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2 == "disk" {print $1}')
 
     # Retornar el array de discos físicos nuevos
-    echo "${discos_nuevos_globales[@]}"
+    echo "${discos_nuevos_disponibles[@]}"
 }
 
 function mostrar_informacion_adicional() {
@@ -50,20 +32,27 @@ function mostrar_informacion_adicional() {
         echo -e "\nInformación adicional sobre los discos físicos nuevos:"
         for disco in "${nombres_discos_nuevos[@]}"; do
             echo -e "\n$disco:"
-            
+
             # Verificar si el disco tiene una tabla de particiones reconocible
-            if parted /dev/$disco print 2>/dev/null | grep -qE '(Partition Table: unknown|lvm)'; then
-                echo "Información del disco:"
-                parted /dev/$disco print
-                # Puedes agregar más comandos para obtener información adicional
+            if [ -e "/tmp/$disco.parted" ]; then
+                # Mostrar la información relevante entre "Model:" y "Disk Flags:"
+                awk '/Model:/{model_found=1} /Disk Flags:/{print; model_found=0} model_found && !/Disk Flags:/{print}' "/tmp/$disco.parted"
+                # Puedes ajustar esto según la salida específica que deseas mostrar
             else
-                echo "El disco no tiene una tabla de particiones reconocible o es reconocible por LVM."
+                echo "No existen discos físicos sin tablas de particiones."
             fi
         done
     fi
 }
 
+# Ejecutar la función principal y obtener los nombres de los discos nuevos
+nombres_discos_nuevos=($(obtener_discos_nuevos))
 
+# Pasar los nombres de los discos nuevos a la función para mostrar información adicional
+mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
+
+# Eliminar archivos temporales
+rm /tmp/*.parted
 
 # Función para listar particiones expandibles
 function listar_particiones_expandibles() {
@@ -266,7 +255,8 @@ while true; do
     read -p "Seleccione una opción (1-7): " opcion
 
     case $opcion in
-        1) nombres_discos_nuevos=($(obtener_discos_nuevos)); mostrar_informacion_adicional "${nombres_discos_nuevos[@]}" ;;
+        1) nombres_discos_nuevos=($(obtener_discos_nuevos))
+mostrar_informacion_adicional "${nombres_discos_nuevos[@]}" ;;
         2) listar_particiones_expandibles ;;
         3) crear_particion_lvm ;;
         4) expandir_particion ;;

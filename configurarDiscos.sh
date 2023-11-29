@@ -87,47 +87,53 @@ function listar_particiones_expandibles() {
 }
 
 expandir_particion() {
-    # Llamar a la función para obtener los discos nuevos
-    nombres_discos_nuevos=($(obtener_discos_nuevos))
+    # Escanear los discos físicos para detectar cambios
+    echo "Escaneando discos físicos..."
+    partprobe
 
-    # Mostrar la información adicional sobre los discos físicos nuevos
-    mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
+    # Mostrar información sobre los discos físicos y su espacio disponible
+    echo -e "Información sobre los discos físicos y espacio disponible:"
+    lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
 
     # Obtener la lista de discos físicos con particiones LVM
     discos_lvm=($(lsblk -o NAME,TYPE | awk '$2 == "disk" {print $1}'))
+
+    if [ ${#discos_lvm[@]} -eq 0 ]; then
+        echo "No se encontraron discos físicos con particiones LVM."
+        return
+    fi
 
     # Filtrar discos que están en la lista de discos nuevos
     discos_lvm=($(comm -12 <(printf "%s\n" "${discos_lvm[@]}" | sort) <(printf "%s\n" "${nombres_discos_nuevos[@]}" | sort)))
 
     if [ ${#discos_lvm[@]} -eq 0 ]; then
-        echo "No hay discos físicos con particiones LVM disponibles para expandir."
-
-        # Permitir al usuario seleccionar el disco físico para expandir
-        PS3="Seleccione el número del disco físico que desea expandir: "
-        select disco in "${nombres_discos_nuevos[@]}"; do
-            if [ -n "$disco" ]; then
-                # Obtener el VG y LV asociados al disco seleccionado
-                nombre_vg=$(lvs --noheadings -o vg_name /dev/$disco | uniq)
-                nombre_lv=$(lvs --noheadings -o lv_name /dev/$disco | uniq)
-
-                # Mostrar información actual del LV
-                lvdisplay /dev/$nombre_vg/$nombre_lv
-
-                # Solicitar la cantidad de espacio adicional en MB
-                read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_lv: " espacio_mb
-
-                # Extender el LV y su filesystem
-                lvextend -L +${espacio_mb}M /dev/$nombre_vg/$nombre_lv
-                resize2fs /dev/$nombre_vg/$nombre_lv
-                echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
-                break
-            else
-                echo "Opción no válida. Intente de nuevo."
-            fi
-        done
-
+        echo "No se encontraron discos físicos disponibles para expandir."
         return
     fi
+
+    # Permitir al usuario seleccionar el disco físico para expandir
+    PS3="Seleccione el número del disco físico que desea expandir: "
+    select disco in "${discos_lvm[@]}"; do
+        if [ -n "$disco" ]; then
+            # Obtener el VG y LV asociados al disco seleccionado
+            nombre_vg=$(lvs --noheadings -o vg_name /dev/$disco | uniq)
+            nombre_lv=$(lvs --noheadings -o lv_name /dev/$disco | uniq)
+
+            # Mostrar información actual del LV
+            lvdisplay /dev/$nombre_vg/$nombre_lv
+
+            # Solicitar la cantidad de espacio adicional en MB
+            read -p "Ingrese la cantidad de espacio adicional en megabytes para $nombre_lv: " espacio_mb
+
+            # Extender el LV y su filesystem
+            lvextend -L +${espacio_mb}M /dev/$nombre_vg/$nombre_lv
+            resize2fs /dev/$nombre_vg/$nombre_lv
+            echo -e "\nEl Logical Volume (LV) $nombre_lv en el Volume Group (VG) $nombre_vg se ha expandido en $espacio_mb megabytes en el disco $disco."
+            break
+        else
+            echo "Opción no válida. Intente de nuevo."
+        fi
+    done
 }
 
 

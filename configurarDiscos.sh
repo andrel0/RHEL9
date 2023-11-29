@@ -86,7 +86,7 @@ function listar_particiones_expandibles() {
     fi
 }
 
-expandir_particion() {
+eexpandir_particion() {
     # Llamar a la función para obtener los discos nuevos
     nombres_discos_nuevos=($(obtener_discos_nuevos))
 
@@ -99,8 +99,16 @@ expandir_particion() {
     # Filtrar discos que no están en la lista de discos nuevos
     discos_disponibles=($(comm -23 <(printf "%s\n" "${discos_disponibles[@]}" | sort) <(printf "%s\n" "${nombres_discos_nuevos[@]}" | sort)))
 
+    # Añade estos comandos para depurar
+    echo "Discos disponibles sin particiones LVM ni en la lista de nuevos:"
+    printf "%s\n" "${discos_disponibles[@]}"
+
     if [ ${#discos_disponibles[@]} -eq 0 ]; then
         echo "No hay discos físicos disponibles sin particiones LVM."
+    else
+        echo "Hay discos físicos disponibles para crear o asignar a un Volume Group (VG)."
+    fi
+}
 
         # Permitir al usuario generar un nuevo VG o asignar un disco físico a un VG existente
         read -p "¿Desea generar un nuevo Volume Group (VG) o asignar un disco físico a un VG existente? (s/n): " respuesta

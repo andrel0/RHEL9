@@ -87,8 +87,14 @@ function listar_particiones_expandibles() {
 }
 
 expandir_particion() {
+    # Llamar a la función para obtener los discos nuevos
+    nombres_discos_nuevos=($(obtener_discos_nuevos))
+
+    # Mostrar la información adicional sobre los discos físicos nuevos
+    mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
+
     # Obtener la lista de discos físicos sin particiones LVM
-    discos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && system("lvdisplay " $1 " > /dev/null") == 1 && system("vgdisplay " $1 " > /dev/null") == 1 {print $1}'))
+    discos_disponibles=($(lsblk -o NAME,TYPE | awk '$2 == "disk" && !($1 in nombres_discos_nuevos) {print $1}'))
 
     if [ ${#discos_disponibles[@]} -eq 0 ]; then
         echo "No hay discos físicos disponibles sin particiones LVM."
@@ -97,12 +103,6 @@ expandir_particion() {
         read -p "¿Desea generar un nuevo Volume Group (VG) o asignar un disco físico a un VG existente? (s/n): " respuesta
 
         if [ "$respuesta" = "s" ]; then
-            # Llamar a la función para obtener los discos nuevos
-            nombres_discos_nuevos=($(obtener_discos_nuevos))
-            
-            # Mostrar la información adicional sobre los discos físicos nuevos
-            mostrar_informacion_adicional "${nombres_discos_nuevos[@]}"
-
             # Seleccionar o crear un Volume Group (VG)
             PS3="Seleccione el número del disco para crear o seleccionar un Volume Group (VG): "
             select disco in "${discos_disponibles[@]}"; do

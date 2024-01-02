@@ -1,0 +1,152 @@
+Crear el directorio para la configuración del socket de Podman:
+
+sudo mkdir -p /etc/systemd/system/podman.socket.d
+
+Este comando crea la estructura de directorios para almacenar archivos de configuración relacionados con el socket de Podman.
+
+==================================================================================================================================================================
+Crear y configurar podman.conf:
+
+
+
+# Crear el archivo
+vi /etc/systemd/system/podman.socket.d/podman.conf
+
+Agrega el siguiente contenido a podman.conf:
+
+
+ini
+[Socket]
+ListenStream=
+ListenStream=/var/run/docker.sock
+SocketMode=770
+SocketUser=elastic
+SocketGroup=podman
+
+
+Establece la propiedad y los permisos:
+
+sudo chown root:root /etc/systemd/system/podman.socket.d/podman.conf
+sudo chmod 0644 /etc/systemd/system/podman.socket.d/podman.conf
+
+==================================================================================================================================================================
+Crear el script docker:
+
+vi /usr/bin/docker
+Agrega el siguiente contenido a /usr/bin/docker:
+
+#!/bin/bash
+podman-remote --url unix:///var/run/docker.sock "$@"
+
+
+Establece permisos:
+
+sudo chmod 0755 /usr/bin/docker
+
+==================================================================================================================================================================
+Configurar storage.conf:
+
+# Agrega estas líneas a la sección [storage] en el archivo /etc/containers/storage.conf
+sudo nano /etc/containers/storage.conf
+Agrega:
+
+ini
+
+runroot = "/mnt/data/docker/runroot/"
+graphroot = "/mnt/data/docker"
+
+==================================================================================================================================================================
+Habilitar los servicios de Podman:
+
+
+sudo systemctl enable podman.service
+sudo systemctl enable podman-restart.service
+
+==================================================================================================================================================================
+Habilitar el módulo del kernel overlay:
+
+echo "overlay" | sudo tee -a /etc/modules-load.d/overlay.conf
+
+==================================================================================================================================================================
+Formatear la partición de datos adicional:
+
+sudo mkfs.xfs /dev/nvme1n1
+
+==================================================================================================================================================================
+Crear el directorio de punto de montaje:
+
+sudo install -o elastic -g elastic -d -m 700 /mnt/data
+
+==================================================================================================================================================================
+Agregar entrada a /etc/fstab para el volumen XFS:
+
+
+sudo nano /etc/fstab
+Agrega la línea (ajusta /dev/nvme1n1 según sea necesario):
+
+/dev/nvme1n1 /mnt/data xfs defaults,nofail,x-systemd.automount,prjquota,pquota 0 2
+
+Luego reinicia:
+sudo systemctl daemon-reload
+sudo systemctl restart local-fs.target
+
+==================================================================================================================================================================
+Establecer permisos en el dispositivo montado:
+
+ls /mnt/data
+sudo chown elastic:elastic /mnt/data
+
+==================================================================================================================================================================
+Crear el directorio de almacenamiento del servicio Docker:
+
+sudo install -o elastic -g elastic -d -m 700 /mnt/data/docker
+
+==================================================================================================================================================================
+Deshabilitar el servicio firewalld:
+
+sudo systemctl disable firewalld
+
+==================================================================================================================================================================
+Configurar parámetros del kernel:
+
+sudo nano /etc/sysctl.conf
+Agrega el siguiente contenido:
+
+ini
+
+vm.max_map_count=262144
+net.ipv4.ip_forward=1
+net.ipv4.tcp_retries2=5
+vm.swappiness=1
+
+
+Aplica la nueva configuración:
+
+sudo sysctl -p
+sudo systemctl restart NetworkManager
+
+==================================================================================================================================================================
+Ajustar los límites del sistema:
+
+sudo nano /etc/security/limits.conf
+Agrega los valores de configuración especificados.
+
+==================================================================================================================================================================
+Opcional: Autenticar al usuario elastic para el registro de Docker:
+
+nano /home/elastic/.docker/config.json
+Agrega el token de autenticación para el registro de Docker.
+
+==================================================================================================================================================================
+Reiniciar el servicio de Podman:
+
+sudo systemctl daemon-reload
+sudo systemctl restart podman
+
+==================================================================================================================================================================
+Reiniciar el host de RHEL:
+
+sudo reboot
+
+
+Estos pasos configuran el entorno para ejecutar Elastic en una instancia de un solo nodo utilizando Podman. Asegúrate de seguir cuidadosamente cada paso y modifica las configuraciones según sea necesario para tu configuración específica.

@@ -1,0 +1,161 @@
+[root@dkr-elk-hc01 ~]# dnf install podman-compose
+Failed to set locale, defaulting to C.UTF-8
+Updating Subscription Management repositories.
+Last metadata expiration check: 4:36:24 ago on Fri Dec 29 08:25:01 2023.
+No match for argument: podman-compose
+Error: Unable to find a match: podman-compose
+
+
+# subscription-manager repos --enable codeready-builder-for-rhel-9-x86_64-rpms
+Repository 'codeready-builder-for-rhel-9-x86_64-rpms' is enabled for this system.
+
+dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+
+sudo dnf install podman-4.2.* podman-remote-4.2.*
+
+dnf install podman-compose
+
+systemctl status podman.service
+○ podman.service - Podman API Service
+     Loaded: loaded (/usr/lib/systemd/system/podman.service; disabled; preset: disabled)
+     Active: inactive (dead)
+TriggeredBy: ○ podman.socket
+       Docs: man:podman-system-service(1)
+	   
+systemctl status podman-restart.service
+○ podman-restart.service - Podman Start All Containers With Restart Policy Set To Always
+     Loaded: loaded (/usr/lib/systemd/system/podman-restart.service; disabled; preset: disabled)
+     Active: inactive (dead)
+       Docs: man:podman-start(1)
+
+echo "overlay" | sudo tee -a /etc/modules-load.d/overlay.conf
+
+groupadd elastic
+groupadd podman
+useradd -g "elastic" -G "podman" elastic
+
+vi /etc/sudoers
+elastic ALL=(ALL) NOPASSWD:ALL
+
+
+dd if=/dev/zero of=/swap/swapfile bs=1M count=500
+
+mkswap /swap/swapfile
+
+chmod 0600 /swap/swapfile
+
+mkswap /swap/swapfile
+mkswap: /swap/swapfile: warning: wiping old swap signature.
+Setting up swapspace version 1, size = 500 MiB (524283904 bytes)
+no label, UUID=3089cd8c-204e-485a-96c9-1a3c222175d1
+
+swapon /swap/swapfile
+
+echo '/swap/swapfile swap swap defaults 0 0' | tee -a /etc/fstab
+
+/sbin/grubby --update-kernel=ALL --args='cgroup_enable=memory cgroup.memory=nokmem swapaccount=1'
+
+mkdir -p /etc/systemd/system/podman.socket.d
+
+vi /etc/systemd/system/podman.socket.d/podman.conf
+
+[Socket]
+ListenStream=
+ListenStream=/var/run/docker.sock
+SocketMode=770
+SocketUser=elastic
+SocketGroup=podman
+
+chown root:root /etc/systemd/system/podman.socket.d/podman.conf
+chmod 0644 /etc/systemd/system/podman.socket.d/podman.conf
+
+vi /usr/bin/docker
+chmod 0755 /usr/bin/docker
+
+vi /etc/containers/storage.conf
+
+# Temporary storage location
+runroot = "/run/containers/storage"
+
+# Primary Read/Write location of container storage
+# When changing the graphroot location on an SELINUX system, you must
+# ensure  the labeling matches the default locations labels with the
+# following commands:
+# semanage fcontext -a -e /var/lib/containers/storage /NEWSTORAGEPATH
+# restorecon -R -v /NEWSTORAGEPATH
+graphroot = "/elasticsearch/data"
+
+
+systemctl enable podman.service
+Created symlink /etc/systemd/system/default.target.wants/podman.service → /usr/lib/systemd/system/podman.service.
+
+systemctl enable podman-restart.service
+Created symlink /etc/systemd/system/default.target.wants/podman-restart.service → /usr/lib/systemd/system/podman-restart.service.
+
+no aplica #mkdir -p /tmp/containers/storage
+no aplica #chmod -R 700 /tmp/containers
+no aplica #chown root:podman /tmp/containers/storage
+
+install -o elastic -g elastic -d -m 700 /elasticsearch/data
+stat -c "%U:%G" /elasticsearch/data
+elastic:elastic
+
+vi /etc/fstab
+
+/dev/elasticsearch_vg/elastic_lv   /elasticsearch  xfs     defaults,nofail,x-systemd.automount,prjquota,pquota  0 2
+
+chown elastic:elastic /elasticsearch/data/
+
+install -o elastic -g elastic -d -m 700 /elasticsearch/data/docker
+
+Disable the firewalld service. The service is not compatible with Podman and interferes with the installation. You must disable firewalld before installing
+
+systemctl disable firewalld.service
+Removed "/etc/systemd/system/multi-user.target.wants/firewalld.service".
+Removed "/etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service".
+
+
+vi /etc/sysctl.d/99-sysctl.conf
+
+o
+
+cat <<EOF | sudo tee -a /etc/sysctl.conf
+# Required by Elasticsearch 5.0 and later
+vm.max_map_count=262144
+# enable forwarding so the Docker networking works as expected
+net.ipv4.ip_forward=1
+# Decrease the maximum number of TCP retransmissions to 5 as recommended for Elasticsearch TCP retransmission timeout.
+# See https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config-tcpretries.html
+net.ipv4.tcp_retries2=5
+# Make sure the host doesn't swap too early
+vm.swappiness=1
+EOF
+
+Apply config: sysctl -p
+vm.max_map_count = 262144
+net.ipv4.ip_forward = 1
+net.ipv4.tcp_retries2 = 5
+vm.swappiness = 1
+
+systemctl restart NetworkManager
+
+As a sudoers user, adjust the system limits. Add the following configuration values to the /etc/security/limits.conf file
+
+vi /etc/security/limits.conf
+
+*                soft    nofile         1024000
+*                hard    nofile         1024000
+*                soft    memlock        unlimited
+*                hard    memlock        unlimited
+elastic          soft    nofile         1024000
+elastic          hard    nofile         1024000
+elastic          soft    memlock        unlimited
+elastic          hard    memlock        unlimited
+root             soft    nofile         1024000
+root             hard    nofile         1024000
+root             soft    memlock        unlimited
+
+# systemctl daemon-reload
+# systemctl restart podman
+# systemctl reboot
+

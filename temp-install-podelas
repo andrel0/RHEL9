@@ -201,3 +201,7 @@ root             soft    memlock        unlimited
     }
 }
 
+podman info --format '{{.Host.Security.SelinuxEnabled}}'
+
+podman info --format '{{.Host.Security.SeccompEnabled}}'
+

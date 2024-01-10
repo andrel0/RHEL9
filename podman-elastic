@@ -275,3 +275,10 @@ Before creating the container from the downloaded image, we need to create the d
 Relabeled /dbdata from unconfined_u:object_r:default_t:s0 to system_u:object_r:container_file_t:s0
 [root@openshift-lab ~]# 
 Once the volume is ready, create the container.
+
+
+cluster.name: my_cluster
+node.name: my_node
+path.data: /usr/share/elasticsearch/data
+network.host: 0.0.0.0
+discovery.type: single-node

@@ -205,3 +205,56 @@ networks:
 podman-compose up -d
 
 Error: unable to start container "dddeed6a97dae54d1f5bbab0cfec279e6305874e29203e3eca7c9973ac03b648": unable to find user elastic: no matching entries in passwd file
+
+
+[root@dkr-elk-hc01 ~]# podman-compose -f elastic-kibana-logstash_pcompose.yaml up -d
+podman-compose version: 1.0.6
+['podman', '--version', '']
+using podman version: 4.6.1
+** excluding:  set()
+['podman', 'ps', '--filter', 'label=io.podman.compose.project=root', '-a', '--format', '{{ index .Labels "io.podman.compose.config-hash"}}']
+recreating: ...
+** excluding:  set()
+podman stop -t 10 logstash
+logstash
+exit code: 0
+podman stop -t 10 kibana
+kibana
+exit code: 0
+podman stop -t 10 elasticsearch
+elasticsearch
+exit code: 0
+podman rm logstash
+logstash
+exit code: 0
+podman rm kibana
+kibana
+exit code: 0
+podman rm elasticsearch
+elasticsearch
+exit code: 0
+recreating: done
+
+
+['podman', 'network', 'exists', 'root_elastic']
+podman run --name=elasticsearch -d --label io.podman.compose.config-hash=828899f67f46aed630500b3880a3bc1f1794d1b8ac9a3ea9c7d281464e4bf67f --label io.podman.compose.project=root --label io.podman.compose.version=1.0.6 --label PODMAN_SYSTEMD_UNIT=podman-compose@root.service --label com.docker.compose.project=root --label com.docker.compose.project.working_dir=/root --label com.docker.compose.project.config_files=elastic-kibana-logstash_pcompose.yaml --label com.docker.compose.container-number=1 --label com.docker.compose.service=elasticsearch -e discovery.type=single-node -v /mnt/data/elasticsearch:/usr/share/elasticsearch/data -v /etc/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro --net root_elastic --network-alias elasticsearch -p 9200:9200 -p 9300:9300 registry.connect.redhat.com/elastic/elasticsearch:8.11.1-63f123cb
+Error: OCI runtime error: crun: mount `/etc/elasticsearch/elasticsearch.yml` to `usr/share/elasticsearch/config/elasticsearch.yml`: Not a directory
+exit code: 126
+podman start elasticsearch
+Error: OCI runtime error: unable to start container "73e3586bff6f35b58656dc0743a650460201357107b019ba1da11cb0f04bc0d0": crun: mount `/etc/elasticsearch/elasticsearch.yml` to `usr/share/elasticsearch/config/elasticsearch.yml`: Not a directory
+exit code: 125
+['podman', 'network', 'exists', 'root_elastic']
+podman run --name=kibana -d --label io.podman.compose.config-hash=828899f67f46aed630500b3880a3bc1f1794d1b8ac9a3ea9c7d281464e4bf67f --label io.podman.compose.project=root --label io.podman.compose.version=1.0.6 --label PODMAN_SYSTEMD_UNIT=podman-compose@root.service --label com.docker.compose.project=root --label com.docker.compose.project.working_dir=/root --label com.docker.compose.project.config_files=elastic-kibana-logstash_pcompose.yaml --label com.docker.compose.container-number=1 --label com.docker.compose.service=kibana -e ELASTICSEARCH_URL=http://elasticsearch:9200 -v /etc/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro --net root_elastic --network-alias kibana -p 5601:5601 registry.connect.redhat.com/elastic/kibana:8.11.3-65c4b655
+Error: OCI runtime error: crun: mount `/etc/kibana/kibana.yml` to `usr/share/kibana/config/kibana.yml`: Not a directory
+exit code: 126
+podman start kibana
+Error: OCI runtime error: unable to start container "3a6c4f4b059e93cf8932e2d1344a7754dafdc40606daa29bc968d53048980f21": crun: mount `/etc/kibana/kibana.yml` to `usr/share/kibana/config/kibana.yml`: Not a directory
+exit code: 125
+['podman', 'network', 'exists', 'root_elastic']
+podman run --name=logstash -d --label io.podman.compose.config-hash=828899f67f46aed630500b3880a3bc1f1794d1b8ac9a3ea9c7d281464e4bf67f --label io.podman.compose.project=root --label io.podman.compose.version=1.0.6 --label PODMAN_SYSTEMD_UNIT=podman-compose@root.service --label com.docker.compose.project=root --label com.docker.compose.project.working_dir=/root --label com.docker.compose.project.config_files=elastic-kibana-logstash_pcompose.yaml --label com.docker.compose.container-number=1 --label com.docker.compose.service=logstash -v /etc/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro -v /etc/logstash/pipeline:/usr/share/logstash/pipeline:ro --net root_elastic --network-alias logstash -p 5044:5044 registry.connect.redhat.com/elastic/logstash:8.11.3-65c4b655
+Error: OCI runtime error: crun: mount `/etc/logstash/logstash.yml` to `usr/share/logstash/config/logstash.yml`: Not a directory
+exit code: 126
+podman start logstash
+Error: OCI runtime error: unable to start container "aefc09f52a69ade7d9b7c06961b09a7ed696f17bda451cd4b9cabcb9ca033068": crun: mount `/etc/logstash/logstash.yml` to `usr/share/logstash/config/logstash.yml`: Not a directory
+exit code: 125
+

@@ -282,3 +282,133 @@ node.name: my_node
 path.data: /usr/share/elasticsearch/data
 network.host: 0.0.0.0
 discovery.type: single-node
+
+
+
+
+
+
+[root@dkr-elk-hc01 ~]# podman-compose -f elastic-kibana-logstash_pcompose.yaml up
+podman-compose version: 1.0.6
+['podman', '--version', '']
+using podman version: 4.6.1
+** excluding:  set()
+['podman', 'ps', '--filter', 'label=io.podman.compose.project=root', '-a', '--format', '{{ index .Labels "io.podman.compose.config-hash"}}']
+['podman', 'network', 'exists', 'root_elastic']
+['podman', 'network', 'create', '--label', 'io.podman.compose.project=root', '--label', 'com.docker.compose.project=root', '--driver', 'bridge', 'root_elastic']
+['podman', 'network', 'exists', 'root_elastic']
+podman create --name=elasticsearch --label io.podman.compose.config-hash=87fa772da6e0b601421a410e45eec59fbc3d48a2e81d5c304302ad9386018591 --label io.podman.compose.project=root --label io.podman.compose.version=1.0.6 --label PODMAN_SYSTEMD_UNIT=podman-compose@root.service --label com.docker.compose.project=root --label com.docker.compose.project.working_dir=/root --label com.docker.compose.project.config_files=elastic-kibana-logstash_pcompose.yaml --label com.docker.compose.container-number=1 --label com.docker.compose.service=elasticsearch -e discovery.type=single-node -v /elasticsearch/single-node/data:/usr/share/elasticsearch/data -v /etc/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml --net root_elastic --network-alias elasticsearch -p 9200:9200 -p 9300:9300 registry.connect.redhat.com/elastic/elasticsearch:8.11.1-63f123cb
+Trying to pull registry.connect.redhat.com/elastic/elasticsearch:8.11.1-63f123cb...
+Getting image source signatures
+Copying blob bf3fa768b9bf done
+Copying blob d88ca31211cc done
+Copying blob 5f92df8b6dc4 done
+Copying blob 83f532a47f85 done
+Copying blob 80afe8e53846 done
+Copying blob 89732bc75041 done
+Copying blob b5d62cb7a76e done
+Copying blob a6b2e70ab83b done
+Copying blob e385ae252727 done
+Copying blob 086bac5f98a4 done
+Copying config 43d79a01ee done
+Writing manifest to image destination
+29b7466817bf0d75e3ae2d1a7249f32e27321977ca0401124f706648ef42bfcc
+exit code: 0
+['podman', 'network', 'exists', 'root_elastic']
+podman create --name=kibana --label io.podman.compose.config-hash=87fa772da6e0b601421a410e45eec59fbc3d48a2e81d5c304302ad9386018591 --label io.podman.compose.project=root --label io.podman.compose.version=1.0.6 --label PODMAN_SYSTEMD_UNIT=podman-compose@root.service --label com.docker.compose.project=root --label com.docker.compose.project.working_dir=/root --label com.docker.compose.project.config_files=elastic-kibana-logstash_pcompose.yaml --label com.docker.compose.container-number=1 --label com.docker.compose.service=kibana -e ELASTICSEARCH_URL=http://elasticsearch:9200 -v /etc/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro --net root_elastic --network-alias kibana -p 5601:5601 registry.connect.redhat.com/elastic/kibana:8.11.3-65c4b655
+Trying to pull registry.connect.redhat.com/elastic/kibana:8.11.3-65c4b655...
+Getting image source signatures
+Copying blob 550c6d361d0e done
+Copying blob 88cd120f5709 done
+Copying blob 89732bc75041 skipped: already exists
+Copying blob 159b78b51f1c done
+Copying blob 009e43b06aa4 done
+Copying blob 86173ca81688 done
+Copying blob 1dbaac751c57 done
+Copying blob ba94b0241a73 done
+Copying blob 89732bc75041 skipped: already exists
+Copying blob 81735a894803 done
+Copying blob 5801a176c82c done
+Copying blob 77e70835f219 done
+Copying blob 8af13b3e5ea0 done
+Copying blob cfbb83384d4b done
+Copying blob 673cd977a8e1 done
+Copying blob 7edd5e140771 done
+Copying config 580cde05cb done
+Writing manifest to image destination
+3479f7d7daed2c0a903fcd3c90571297f6f34dc3f9ff3afe34bb8b507eb9eb63
+exit code: 0
+podman start -a elasticsearch
+podman start -a kibana
+Exception in thread "main" java.nio.file.AccessDeniedException: /usr/share/elasticsearch/data
+        at java.base/sun.nio.fs.UnixException.translateToIOException(UnixException.java:90)
+        at java.base/sun.nio.fs.UnixException.asIOException(UnixException.java:115)
+        at java.base/sun.nio.fs.UnixFileSystemProvider.newDirectoryStream(UnixFileSystemProvider.java:477)
+        at java.base/java.nio.file.Files.newDirectoryStream(Files.java:481)
+        at java.base/java.nio.file.Files.list(Files.java:3772)
+        at org.elasticsearch.xpack.security.cli.AutoConfigureNode.isDirEmpty(AutoConfigureNode.java:1146)
+        at org.elasticsearch.xpack.security.cli.AutoConfigureNode.execute(AutoConfigureNode.java:166)
+        at org.elasticsearch.server.cli.ServerCli.autoConfigureSecurity(ServerCli.java:165)
+        at org.elasticsearch.server.cli.ServerCli.execute(ServerCli.java:86)
+        at org.elasticsearch.common.cli.EnvironmentAwareCommand.execute(EnvironmentAwareCommand.java:54)
+        at org.elasticsearch.cli.Command.mainWithoutErrorHandling(Command.java:85)
+        at org.elasticsearch.cli.Command.main(Command.java:50)
+        at org.elasticsearch.launcher.CliToolLauncher.main(CliToolLauncher.java:64)
+[kibana]        | Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/8.11/production.html#openssl-legacy-provider
+exit code: 1
+[kibana]        | {"log.level":"info","@timestamp":"2024-01-10T23:44:47.758Z","log":{"logger":"elastic-apm-node"},"agentVersion":"4.1.0","env":{"pid":2,"proctitle":"/usr/share/kibana/bin/../node/bin/node","os":"linux 5.14.0-362.13.1.el9_3.x86_64","arch":"x64","host":"3479f7d7daed","timezone":"UTC+00","runtime":"Node.js v18.18.2"},"config":{"serviceName":{"source":"start","value":"kibana","commonName":"service_name"},"serviceVersion":{"source":"start","value":"8.11.3","commonName":"service_version"},"serverUrl":{"source":"start","value":"https://kibana-cloud-apm.apm.us-east-1.aws.found.io/","commonName":"server_url"},"logLevel":{"source":"default","value":"info","commonName":"log_level"},"active":{"source":"start","value":true},"contextPropagationOnly":{"source":"start","value":true},"environment":{"source":"start","value":"production"},"globalLabels":{"source":"start","value":[["git_rev","cc11667953f4734af414e8d8977b8d9dda5698ef"]],"sourceValue":{"git_rev":"cc11667953f4734af414e8d8977b8d9dda5698ef"}},"secretToken":{"source":"start","value":"[REDACTED]","commonName":"secret_token"},"breakdownMetrics":{"source":"start","value":false},"captureSpanStackTraces":{"source":"start","sourceValue":false},"centralConfig":{"source":"start","value":false},"metricsInterval":{"source":"start","value":120,"sourceValue":"120s"},"propagateTracestate":{"source":"start","value":true},"transactionSampleRate":{"source":"start","value":0.1,"commonName":"transaction_sample_rate"},"captureBody":{"source":"start","value":"off","commonName":"capture_body"},"captureHeaders":{"source":"start","value":false}},"activationMethod":"require","ecs":{"version":"1.6.0"},"message":"Elastic APM Node.js Agent v4.1.0"}
+[kibana]        | [2024-01-10T23:44:49.567+00:00][INFO ][root] Kibana is starting
+[kibana]        | [2024-01-10T23:44:49.648+00:00][INFO ][root] Kibana is shutting down
+[kibana]        | [2024-01-10T23:44:49.654+00:00][FATAL][root] Reason: [config validation of [server].host]: value must be a valid hostname (see RFC 1123).
+[kibana]        | Error: [config validation of [server].host]: value must be a valid hostname (see RFC 1123).
+[kibana]        |     at ObjectType.validate (/usr/share/kibana/node_modules/@kbn/config-schema/src/types/type.js:94:13)
+[kibana]        |     at ConfigService.validateAtPath (/usr/share/kibana/node_modules/@kbn/config/src/config_service.js:252:19)
+[kibana]        |     at /usr/share/kibana/node_modules/@kbn/config/src/config_service.js:262:204
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/map.js:10:37
+[kibana]        |     at OperatorSubscriber._this._next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:33:21)
+[kibana]        |     at OperatorSubscriber.Subscriber.next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Subscriber.js:51:18)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/distinctUntilChanged.js:18:28
+[kibana]        |     at OperatorSubscriber._this._next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:33:21)
+[kibana]        |     at OperatorSubscriber.Subscriber.next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Subscriber.js:51:18)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/map.js:10:24
+[kibana]        |     at OperatorSubscriber._this._next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:33:21)
+[kibana]        |     at OperatorSubscriber.Subscriber.next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Subscriber.js:51:18)
+[kibana]        |     at ReplaySubject._subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/ReplaySubject.js:54:24)
+[kibana]        |     at ReplaySubject.Observable._trySubscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:41:25)
+[kibana]        |     at ReplaySubject.Subject._trySubscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Subject.js:123:47)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:35:31
+[kibana]        |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana]        |     at ReplaySubject.Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/share.js:66:18
+[kibana]        |     at OperatorSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana]        |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana]        |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/map.js:9:16
+[kibana]        |     at OperatorSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana]        |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana]        |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/distinctUntilChanged.js:13:16
+[kibana]        |     at OperatorSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana]        |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana]        |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/map.js:9:16
+[kibana]        |     at SafeSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana]        |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana]        |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana]        |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/firstValueFrom.js:24:16
+[kibana]        |     at new Promise (<anonymous>)
+[kibana]        |     at firstValueFrom (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/firstValueFrom.js:8:12)
+[kibana]        |     at EnvironmentService.preboot (/usr/share/kibana/node_modules/@kbn/core-environment-server-internal/src/environment_service.js:50:169)
+[kibana]        |     at Server.preboot (/usr/share/kibana/node_modules/@kbn/core-root-server-internal/src/server.js:146:55)
+[kibana]        |     at Root.preboot (/usr/share/kibana/node_modules/@kbn/core-root-server-internal/src/root/index.js:47:32)
+[kibana]        |     at processTicksAndRejections (node:internal/process/task_queues:95:5)
+[kibana]        |     at bootstrap (/usr/share/kibana/node_modules/@kbn/core-root-server-internal/src/bootstrap.js:97:9)
+[kibana]        |     at Command.<anonymous> (/usr/share/kibana/src/cli/serve/serve.js:211:5)
+
+ FATAL  Error: [config validation of [server].host]: value must be a valid hostname (see RFC 1123).
+
+exit code: 1

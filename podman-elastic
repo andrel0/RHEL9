@@ -164,9 +164,11 @@ services:
       - discovery.type=single-node
     volumes:
       - /mnt/data/elasticsearch:/usr/share/elasticsearch/data
+      - /etc/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
     ports:
       - "9200:9200"
       - "9300:9300"
+    user: "elastic"
     networks:
       - elastic
 
@@ -175,8 +177,23 @@ services:
     container_name: kibana
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+    volumes:
+      - /etc/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
     ports:
       - "5601:5601"
+    user: "elastic"
+    networks:
+      - elastic
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.x
+    container_name: logstash
+    volumes:
+      - /etc/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - /etc/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5044:5044"
+    user: "elastic"
     networks:
       - elastic
 

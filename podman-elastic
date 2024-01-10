@@ -203,3 +203,5 @@ networks:
 
 
 podman-compose up -d
+
+Error: unable to start container "dddeed6a97dae54d1f5bbab0cfec279e6305874e29203e3eca7c9973ac03b648": unable to find user elastic: no matching entries in passwd file

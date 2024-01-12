@@ -276,15 +276,7 @@ Relabeled /dbdata from unconfined_u:object_r:default_t:s0 to system_u:object_r:c
 [root@openshift-lab ~]# 
 Once the volume is ready, create the container.
 
-
-cluster.name: my_cluster
-node.name: my_node
-path.data: /usr/share/elasticsearch/data
-network.host: 0.0.0.0
-discovery.type: single-node
-
-
-
+.
 
 
 
@@ -434,12 +426,19 @@ firewall-cmd --reload
 systemctl status firewalld
 
 elasticsearch.yml
+------------------
+cluster.name: single_node_podman
+node.name: elasticsearch
+path.data: /usr/share/elasticsearch/data
 network.host: 0.0.0.0
 discovery.type: single-node
-xpack.security.enabled: true
-xpack.security.authc.api_key.enabled: true
+#xpack.license.self_generated.type: trial
+xpack.license.self_generated.type: basic
+xpack.monitoring.collection.enabled: true
 
 # Configuración de la autenticación nativa
+xpack.security.enabled: true
+xpack.security.authc.api_key.enabled: true
 xpack.security.authc.realms.native.native1.type: native
 xpack.security.authc.realms.native.native1.order: 0
 xpack.security.user:
@@ -451,17 +450,16 @@ xpack.security.user:
 #xpack.security.http.ssl.enabled: true
 #xpack.security.http.ssl.keystore.path: /usr/share/elasticsearch/config/elastic-certificates.p12
 #xpack.security.http.ssl.truststore.path: /usr/share/elasticsearch/config/elastic-certificates.p12
-
 #xpack.security.transport.ssl.enabled: false
 #xpack.security.transport.ssl.verification_mode: certificate
 
 
 kibana.yml
+------------
 server.name: kibana
 #server.host: "0"
 elasticsearch.hosts: ["http://elasticsearch:9200"]
-
 elasticsearch.auth.type: "basic"
 elasticsearch.auth.basic.enabled: true
 elasticsearch.username: "elastic"
-elasticsearch.password: "tu_contrasena_aqui"
+elasticsearch.password: "elastic"

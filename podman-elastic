@@ -433,8 +433,8 @@ path.data: /usr/share/elasticsearch/data
 path.logs: /usr/share/elasticsearch/data
 network.host: 0.0.0.0
 discovery.type: single-node
-#xpack.license.self_generated.type: trial
 xpack.license.self_generated.type: basic
+#xpack.license.self_generated.type: trial
 xpack.monitoring.collection.enabled: true
 
 # Configuración de la autenticación nativa
@@ -442,10 +442,7 @@ xpack.security.enabled: true
 xpack.security.authc.api_key.enabled: true
 xpack.security.authc.realms.native.native1.type: native
 xpack.security.authc.realms.native.native1.order: 0
-xpack.security.user:
-  elastic:
-    password: "elastic"
-    roles: ["superuser"]
+xpack.security.authc.realms.native.native1.users.elastic: "elastic:podman_elastic:superuser"
 
 # configuracion SSL | Certificados
 #xpack.security.http.ssl.enabled: true
@@ -463,7 +460,7 @@ elasticsearch.hosts: ["http://elasticsearch:9200"]
 elasticsearch.auth.type: "basic"
 elasticsearch.auth.basic.enabled: true
 elasticsearch.username: "elastic"
-elasticsearch.password: "elastic"
+elasticsearch.password: "podman_elastic"
 
 
 

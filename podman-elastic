@@ -412,3 +412,23 @@ exit code: 1
  FATAL  Error: [config validation of [server].host]: value must be a valid hostname (see RFC 1123).
 
 exit code: 1
+
+
+# Habilitar el servicio para el puerto 9200 (Elasticsearch)
+firewall-cmd --permanent --add-service=9200/tcp --zone=public --add-interface=elastic --permanent
+firewall-cmd --permanent --add-service=9200/tcp --zone=trusted --add-interface=elastic --permanent
+
+# Habilitar el servicio para el puerto 9300 (Elasticsearch)
+firewall-cmd --permanent --add-service=9300/tcp --zone=public --add-interface=elastic --permanent
+firewall-cmd --permanent --add-service=9300/tcp --zone=trusted --add-interface=elastic --permanent
+
+# Habilitar el servicio para el puerto 5601 (Kibana)
+firewall-cmd --permanent --add-service=5601/tcp --zone=public --add-interface=elastic --permanent
+firewall-cmd --permanent --add-service=5601/tcp --zone=trusted --add-interface=elastic --permanent
+
+# Habilitar el servicio para el puerto 5044 (Logstash)
+firewall-cmd --permanent --add-service=5044/tcp --zone=public --add-interface=elastic --permanent
+firewall-cmd --permanent --add-service=5044/tcp --zone=trusted --add-interface=elastic --permanent
+
+firewall-cmd --reload
+systemctl status firewalld

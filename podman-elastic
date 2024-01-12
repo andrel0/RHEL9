@@ -430,6 +430,7 @@ elasticsearch.yml
 cluster.name: single_node_podman
 node.name: elasticsearch
 path.data: /usr/share/elasticsearch/data
+path.logs: /usr/share/elasticsearch/data
 network.host: 0.0.0.0
 discovery.type: single-node
 #xpack.license.self_generated.type: trial

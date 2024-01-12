@@ -468,13 +468,14 @@ elasticsearch.password: "podman_elastic"
 
 
 
+[kibana] | [2024-01-12T23:50:30.807+00:00][FATAL][root] Reason: [config validation of [elasticsearch].username]: value of "elastic" is forbidden. This is a superuser account that cannot write to system indices that Kibana needs to function. Use a service account token instead. Learn more: https://www.elastic.co/guide/en/elasticsearch/reference/8.0/service-accounts.html
+[kibana] | Error: [config validation of [elasticsearch].username]: value of "elastic" is forbidden. This is a superuser account that cannot write to system indices that Kibana needs to function. Use a service account token instead. Learn more: https://www.elastic.co/guide/en/elasticsearch/reference/8.0/service-accounts.html
+[kibana] |     at ensureValidConfiguration (/usr/share/kibana/node_modules/@kbn/core-config-server-internal/src/ensure_valid_configuration.js:23:11)
+[kibana] |     at Server.preboot (/usr/share/kibana/node_modules/@kbn/core-root-server-internal/src/server.js:162:5)
+[kibana] |     at Root.preboot (/usr/share/kibana/node_modules/@kbn/core-root-server-internal/src/root/index.js:47:14)
+[kibana] |     at bootstrap (/usr/share/kibana/node_modules/@kbn/core-root-server-internal/src/bootstrap.js:97:9)
+[kibana] |     at Command.<anonymous> (/usr/share/kibana/src/cli/serve/serve.js:211:5)
 
+ FATAL  Error: [config validation of [elasticsearch].username]: value of "elastic" is forbidden. This is a superuser account that cannot write to system indices that Kibana needs to function. Use a service account token instead. Learn more: https://www.elastic.co/guide/en/elasticsearch/reference/8.0/service-accounts.html
 
-
-
-
-[elasticsearch] | {"@timestamp":"2024-01-12T22:14:09.674Z", "log.level":"ERROR", "message":"fatal exception while booting Elasticsearch", "ecs.version": "1.2.0","service.name":"ES_ECS","event.dataset":"elasticsearch.server","process.thread.name":"main","log.logger":"org.elasticsearch.bootstrap.Elasticsearch","elasticsearch.node.name":"elasticsearch","elasticsearch.cluster.name":"single_node_podman","error.type":"java.lang.IllegalArgumentException","error.message":"unknown setting [xpack.security.user.elastic.password] please check that any required plugins are installed, or check the breaking changes documentation for removed settings","error.stack_trace":"java.lang.IllegalArgumentException: unknown setting [xpack.security.user.elastic.password] please check that any required plugins are installed, or check the breaking changes documentation for removed settings\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.common.settings.AbstractScopedSettings.validate(AbstractScopedSettings.java:563)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.common.settings.AbstractScopedSettings.validate(AbstractScopedSettings.java:509)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.common.settings.AbstractScopedSettings.validate(AbstractScopedSettings.java:479)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.common.settings.AbstractScopedSettings.validate(AbstractScopedSettings.java:449)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.common.settings.SettingsModule.<init>(SettingsModule.java:132)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.common.settings.SettingsModule.<init>(SettingsModule.java:50)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.node.Node.<init>(Node.java:494)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.node.Node.<init>(Node.java:344)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.bootstrap.Elasticsearch$2.<init>(Elasticsearch.java:236)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.bootstrap.Elasticsearch.initPhase3(Elasticsearch.java:236)\n\tat org.elasticsearch.server@8.11.1/org.elasticsearch.bootstrap.Elasticsearch.main(Elasticsearch.java:73)\n\tSuppressed: java.lang.IllegalArgumentException: unknown setting [xpack.security.authc.realms.native.native1.type] please check that any required plugins are installed, or check the breaking changes documentation for removed settings\n\t\t... 11 more\n\tSuppressed: java.lang.IllegalArgumentException: unknown setting [xpack.security.user.elastic.roles] please check that any required plugins are installed, or check the breaking changes documentation for removed settings\n\t\t... 11 more\n"}
-ERROR: Elasticsearch did not exit normally - check the logs at /usr/share/elasticsearch/data/single_node_podman.log
-
-ERROR: Elasticsearch exited unexpectedly, with exit code 1
-
+exit code: 78

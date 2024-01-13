@@ -435,15 +435,15 @@ network.host: 0.0.0.0
 discovery.type: single-node
 xpack.license.self_generated.type: basic
 #xpack.license.self_generated.type: trial
-xpack.security.autoconfiguration.enabled: false
 xpack.monitoring.collection.enabled: true
-
-# Configuración de la autenticación nativa
+xpack.security.autoconfiguration.enabled: true
 xpack.security.enabled: true
 xpack.security.authc.api_key.enabled: true
-xpack.security.authc.realms.native.native1.type: native
-xpack.security.authc.realms.native.native1.order: 0
-xpack.security.authc.realms.native.native1.users.elastic: "elastic:podman_elastic:superuser"
+xpack.security.enrollment.enabled: true
+# Configuracion nativa - requiere persistencia y se administra a traves de kibana
+#xpack.security.authc.realms.native.native1.type: native
+#xpack.security.authc.realms.native.native1.order: 0
+#xpack.security.authc.realms.native.native1.users.elastic: "elastic:podman_elastic:superuser"
 
 # configuracion SSL | Certificados
 #xpack.security.http.ssl.enabled: true
@@ -453,6 +453,7 @@ xpack.security.authc.realms.native.native1.users.elastic: "elastic:podman_elasti
 #xpack.security.transport.ssl.verification_mode: certificate
 
 
+
 kibana.yml
 ------------
 server.name: kibana
@@ -460,7 +461,7 @@ server.name: kibana
 elasticsearch.hosts: ["http://elasticsearch:9200"]
 elasticsearch.auth.type: "basic"
 elasticsearch.auth.basic.enabled: true
-elasticsearch.username: "elastic"
+elasticsearch.username: "kibana"
 elasticsearch.password: "podman_elastic"
 
 

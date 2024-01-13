@@ -488,3 +488,7 @@ WARNING: Owner of file [/usr/share/elasticsearch/config/users_roles] used to be 
 Unable to create enrollment token for scope [kibana]
 
 ERROR: Unable to create an enrollment token. Elasticsearch node HTTP layer SSL configuration is not configured with a keystore, with exit code 73
+
+
+          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+          unzip config/certs/certs.zip -d config/certs;

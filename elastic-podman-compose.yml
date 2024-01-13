@@ -68,5 +68,12 @@ services:
       - "9200:9200"
       - "9300:9300"
     group: "podman"
-    networks:
-      - elastic
+
+networks:
+  elastic:
+    driver: bridge
+
+    exit code: 0
+podman start -a elasticsearch
+[elasticsearch] | Set the ELASTIC_PASSWORD and KIBANA_PASSWORD environment variables
+exit code: 1

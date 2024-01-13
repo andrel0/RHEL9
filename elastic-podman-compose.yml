@@ -6,6 +6,9 @@ services:
     container_name: elasticsearch
     command: >
       bash -c '
+        echo "ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}"
+        echo "KIBANA_PASSWORD: ${KIBANA_PASSWORD}"
+
         if [ x"${ELASTIC_PASSWORD}" == x ] || [ x"${KIBANA_PASSWORD}" == x ]; then
           echo "Set the ELASTIC_PASSWORD and KIBANA_PASSWORD environment variables";
           exit 1;

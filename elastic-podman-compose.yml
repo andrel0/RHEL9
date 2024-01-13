@@ -1,3 +1,5 @@
+version: '3'
+
 services:
   elasticsearch:
     image: registry.connect.redhat.com/elastic/elasticsearch:8.11.1-63f123cb
@@ -75,6 +77,18 @@ networks:
     driver: bridge
 
     exit code: 0
-podman start -a elasticsearch
-[elasticsearch] | Set the ELASTIC_PASSWORD and KIBANA_PASSWORD environment variables
-exit code: 1
+
+
+[elasticsearch] | ELASTIC_PASSWORD: elastic-clave-01
+[elasticsearch] | KIBANA_PASSWORD: kibana-clave-02
+[elasticsearch] | Creating CA
+bash: line 13: podman: command not found
+unzip:  cannot find or open config/certs/ca.zip, config/certs/ca.zip.zip or config/certs/ca.zip.ZIP.
+[elasticsearch] | Creating certs
+bash: line 27: podman: command not found
+unzip:  cannot find or open config/certs/certs.zip, config/certs/certs.zip.zip or config/certs/certs.zip.ZIP.
+[elasticsearch] | Setting file permissions
+bash: line 38: podman: command not found
+bash: line 39: podman: command not found
+bash: line 40: podman: command not found
+[elasticsearch] | Waiting for Elasticsearch availability

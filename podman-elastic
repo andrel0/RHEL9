@@ -480,3 +480,11 @@ elasticsearch.password: "podman_elastic"
  FATAL  Error: [config validation of [elasticsearch].username]: value of "elastic" is forbidden. This is a superuser account that cannot write to system indices that Kibana needs to function. Use a service account token instead. Learn more: https://www.elastic.co/guide/en/elasticsearch/reference/8.0/service-accounts.html
 
 exit code: 78
+
+
+[root@dkr-elk-hc01 ~]# podman exec -it elasticsearch /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+WARNING: Owner of file [/usr/share/elasticsearch/config/users] used to be [root], but now is [elasticsearch]
+WARNING: Owner of file [/usr/share/elasticsearch/config/users_roles] used to be [root], but now is [elasticsearch]
+Unable to create enrollment token for scope [kibana]
+
+ERROR: Unable to create an enrollment token. Elasticsearch node HTTP layer SSL configuration is not configured with a keystore, with exit code 73

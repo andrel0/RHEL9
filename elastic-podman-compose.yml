@@ -18,9 +18,9 @@ services:
 
         if [ ! -f config/certs/ca.zip ]; then
           echo "Creating CA";
-          podman exec -T elasticsearch \
+          /usr/bin/podman exec -T elasticsearch \
             bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
-          unzip config/certs/ca.zip -d config/certs;
+          /usr/bin/unzip config/certs/ca.zip -d config/certs;
         fi;
 
         if [ ! -f config/certs/certs.zip ]; then
@@ -32,20 +32,20 @@ services:
             "      - elasticsearch\n"\
             > config/certs/instances.yml;
 
-          podman exec -T elasticsearch \
+          /usr/bin/podman exec -T elasticsearch \
             bin/elasticsearch-certutil cert --silent --pem \
               -out config/certs/certs.zip \
               --in config/certs/instances.yml \
               --ca-cert config/certs/ca/ca.crt \
               --ca-key config/certs/ca/ca.key;
 
-          unzip config/certs/certs.zip -d config/certs;
+          /usr/bin/unzip config/certs/certs.zip -d config/certs;
         fi;
 
         echo "Setting file permissions";
-        podman exec elasticsearch chown -R root:root config/certs;
-        podman exec elasticsearch find . -type d -exec chmod 750 {} \;
-        podman exec elasticsearch find . -type f -exec chmod 640 {} \;
+        /usr/bin/podman exec elasticsearch chown -R root:root config/certs;
+        /usr/bin/podman exec elasticsearch find . -type d -exec chmod 750 {} \;
+        /usr/bin/podman exec elasticsearch find . -type f -exec chmod 640 {} \;
 
         echo "Waiting for Elasticsearch availability";
         until curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q "missing authentication credentials"; do

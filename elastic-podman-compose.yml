@@ -11,7 +11,7 @@ services:
     volumes:
       - /elasticsearch/single-node/data/:/usr/share/elasticsearch/data
       - /elasticsearch/single-node/logs/:/usr/share/elasticsearch/logs
-      - /elasticsearch/single-node/config/certs/:/usr/share/elasticsearch/config/certs
+      - /elasticsearch/single-node/data/certs/:/usr/share/elasticsearch/config/certs
       - /etc/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     command: >
       bash -c '
@@ -68,3 +68,37 @@ services:
 networks:
   elastic:
     driver: bridge
+
+
+[root@dkr-elk-hc01 ELK]# podman logs elasticsearch
+ELASTIC_PASSWORD: elastic_password
+KIBANA_PASSWORD: kibana_password
+Creating CA
+Archive:  config/certs/ca.zip
+  inflating: config/certs/ca/ca.crt
+  inflating: config/certs/ca/ca.key
+Creating certs
+Archive:  config/certs/certs.zip
+   creating: config/certs/elasticsearch/
+  inflating: config/certs/elasticsearch/elasticsearch.crt
+  inflating: config/certs/elasticsearch/elasticsearch.key
+Setting file permissions
+chown: changing ownership of 'config/certs/ca/ca.crt': Operation not permitted
+chown: changing ownership of 'config/certs/ca/ca.key': Operation not permitted
+chown: changing ownership of 'config/certs/ca': Operation not permitted
+chown: changing ownership of 'config/certs/ca.zip': Operation not permitted
+chown: changing ownership of 'config/certs/instances.yml': Operation not permitted
+chown: changing ownership of 'config/certs/certs.zip': Operation not permitted
+chown: changing ownership of 'config/certs/elasticsearch/elasticsearch.crt': Operation not permitted
+chown: changing ownership of 'config/certs/elasticsearch/elasticsearch.key': Operation not permitted
+chown: changing ownership of 'config/certs/elasticsearch': Operation not permitted
+chown: changing ownership of 'config/certs': Operation not permitted
+chmod: changing permissions of '.': Operation not permitted
+chmod: changing permissions of './jdk': Operation not permitted
+chmod: changing permissions of './jdk/bin': Operation not permitted
+chmod: changing permissions of './jdk/conf': Operation not permitted
+chmod: changing permissions of './jdk/conf/management': Operation not permitted
+chmod: changing permissions of './jdk/conf/sdp': Operation not permitted
+chmod: changing permissions of './jdk/conf/security': Operation not permitted
+chmod: changing permissions of './jdk/conf/security/policy': Operation not permitted
+chmod:  changing permissions of 

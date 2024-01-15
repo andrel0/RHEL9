@@ -11,7 +11,7 @@ services:
     volumes:
       - /elasticsearch/single-node/data/:/usr/share/elasticsearch/data
       - /elasticsearch/single-node/logs/:/usr/share/elasticsearch/logs
-      - /elasticsearch/single-node/data/certs/:/usr/share/elasticsearch/config/certs
+      - /elasticsearch/single-node/config/certs/:/usr/share/elasticsearch/config/certs
       - /etc/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     command: bash -c '
         echo "ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}"
@@ -72,4 +72,3 @@ services:
 networks:
   elastic:
     driver: bridge
-

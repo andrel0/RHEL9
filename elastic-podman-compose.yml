@@ -1,11 +1,11 @@
+[root@dkr-elk-hc01 ~]# cat ELK/elastic-composev2.yml
 version: '3'
 
 services:
   elasticsearch:
     image: registry.connect.redhat.com/elastic/elasticsearch:8.11.1-63f123cb
     container_name: elasticsearch
-    command: >
-      bash -c '
+    command: bash -c '
         echo "ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}"
         echo "KIBANA_PASSWORD: ${KIBANA_PASSWORD}"
 
@@ -24,12 +24,19 @@ services:
 
         if [ ! -f config/certs/certs.zip ]; then
           echo "Creating certs";
-          echo -ne "instances:\n  - name: elasticsearch\n    dns:\n      - elasticsearch\n" > config/certs/instances.yml;
+          echo -ne \
+            "instances:\n"\
+            "  - name: elasticsearch\n"\
+            "    dns:\n"\
+            "      - elasticsearch\n"\
+            > config/certs/instances.yml;
+
           podman exec -it elasticsearch bin/elasticsearch-certutil cert --silent --pem \
               -out config/certs/certs.zip \
               --in config/certs/instances.yml \
               --ca-cert config/certs/ca/ca.crt \
               --ca-key config/certs/ca/ca.key;
+
           unzip config/certs/certs.zip -d config/certs;
         fi;
 
@@ -44,7 +51,7 @@ services:
         done;
 
         echo "Setting kibana_system password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://localhost:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://localhost:9200/_security/user/                                                                    kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do
           sleep 10;
         done;
 
@@ -52,8 +59,8 @@ services:
       '
     environment:
       - discovery.type=single-node
-      - ELASTIC_PASSWORD=cambiar
-      - KIBANA_PASSWORD=cambiar
+      - ELASTIC_PASSWORD=W+deOwxFCeHsVkRjadasdsadtLJASDJADJ
+      - KIBANA_PASSWORD=W+deOwxFCe2xxHsVkRjtCJADKJADksjakdj
     volumes:
       - /elasticsearch/single-node/data/:/usr/share/elasticsearch/data
       - /elasticsearch/single-node/logs/:/usr/share/elasticsearch/logs
@@ -63,6 +70,9 @@ services:
       - "9300:9300"
     group: "podman"
 
+networks:
+  elastic:
+    driver: bridge
 
 
 [elasticsearch] | Creating CA

@@ -44,9 +44,9 @@ services:
         fi
 
         echo "Setting file permissions"
-        chown -R root:root config/certs
-        find . -type d -exec chmod 750 {} \;
-        find . -type f -exec chmod 640 {} \;
+        podman exec -it elasticsearch chown -R root:root /usr/share/elasticsearch/config/certs
+        podman exec -it elasticsearch find /usr/share/elasticsearch/config/certs -type d -exec chmod 750 {} \;
+        podman exec -it elasticsearch find /usr/share/elasticsearch/config/certs -type f -exec chmod 640 {} \;
 
         echo "Waiting for Elasticsearch availability"
         until curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q "missing authentication credentials"; do

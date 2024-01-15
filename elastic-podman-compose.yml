@@ -102,3 +102,14 @@ chmod: changing permissions of './jdk/conf/sdp': Operation not permitted
 chmod: changing permissions of './jdk/conf/security': Operation not permitted
 chmod: changing permissions of './jdk/conf/security/policy': Operation not permitted
 chmod:  changing permissions of 
+
+stat /elasticsearch/single-node/data/certs/
+  File: /elasticsearch/single-node/data/certs/
+  Size: 89              Blocks: 0          IO Block: 4096   directory
+Device: fd01h/64769d    Inode: 33598976    Links: 4
+Access: (0750/drwxr-x---)  Uid: ( 1000/ elastic)   Gid: ( 1000/ elastic)
+Context: unconfined_u:object_r:container_file_t:s0
+Access: 2024-01-15 13:31:51.127480446 -0300
+Modify: 2024-01-15 13:31:50.695480471 -0300
+Change: 2024-01-15 13:31:50.894480459 -0300
+ Birth: 2024-01-15 13:18:46.684526464 -0300

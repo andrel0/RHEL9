@@ -99,6 +99,38 @@ services:
       - "9300:9300"
     group: "podman"
 
+kibana:
+   depends_on:
+     elasticsearch:
+       condition: service_healthy
+   image: 
+   labels:
+     co.elastic.logs/module: kibana
+   volumes:
+     - /elasticsearch/single-node/data/certs/:/usr/share/elasticsearch/config/certs
+     - kibanadata:/usr/share/kibana/data
+   ports:
+     - ${KIBANA_PORT}:5601
+   environment:
+     - SERVERNAME=kibana
+     - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+     - ELASTICSEARCH_USERNAME=kibana_system
+     - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+     - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+     - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+     - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+     - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+   #mem_limit: ${KB_MEM_LIMIT}
+   healthcheck:
+     test:
+       [
+         "CMD-SHELL",
+         "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+       ]
+     interval: 10s
+     timeout: 10s
+     retries: 120
+
 networks:
   lan_elastic:
     driver: bridge

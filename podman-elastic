@@ -510,3 +510,63 @@ type=AVC msg=audit(1705440041.589:269): avc:  denied  { read } for  pid=8761 com
 type=AVC msg=audit(1705440043.755:276): avc:  denied  { read } for  pid=8761 comm="node" name="kibana" dev="dm-2" ino=8414950 scontext=system_u:system_r:container_t:s0:c651,c905 tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=dir permissive=0
 type=AVC msg=audit(1705440043.888:277): avc:  denied  { read } for  pid=8761 comm="node" name="kibana" dev="dm-2" ino=8414950 scontext=system_u:system_r:container_t:s0:c651,c905 tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=dir permissive=0
 type=AVC msg=audit(1705440043.912:278): avc:  denied  { write } for  pid=8761 comm="node" name="kibana" dev="dm-2" ino=8414950 scontext=system_u:system_r:container_t:s0:c651,c905 tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=dir permissive=0
+
+
+[kibana] | [2024-01-16T21:51:00.747+00:00][INFO ][root] Kibana is starting
+[kibana] | [2024-01-16T21:51:00.834+00:00][INFO ][node] Kibana process configured with roles: [background_tasks, ui]
+[kibana] | [2024-01-16T21:51:17.613+00:00][INFO ][root] Kibana is shutting down
+[kibana] | [2024-01-16T21:51:17.618+00:00][FATAL][root] Reason: [config validation of [xpack.encryptedSavedObjects].encryptionKey]: value has length [31] but it must have a minimum length of [32].
+[kibana] | Error: [config validation of [xpack.encryptedSavedObjects].encryptionKey]: value has length [31] but it must have a minimum length of [32].
+[kibana] |     at ObjectType.validate (/usr/share/kibana/node_modules/@kbn/config-schema/src/types/type.js:94:13)
+[kibana] |     at ConfigService.validateAtPath (/usr/share/kibana/node_modules/@kbn/config/src/config_service.js:252:19)
+[kibana] |     at /usr/share/kibana/node_modules/@kbn/config/src/config_service.js:262:204
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/map.js:10:37
+[kibana] |     at OperatorSubscriber._this._next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:33:21)
+[kibana] |     at OperatorSubscriber.Subscriber.next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Subscriber.js:51:18)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/distinctUntilChanged.js:18:28
+[kibana] |     at OperatorSubscriber._this._next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:33:21)
+[kibana] |     at OperatorSubscriber.Subscriber.next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Subscriber.js:51:18)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/map.js:10:24
+[kibana] |     at OperatorSubscriber._this._next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:33:21)
+[kibana] |     at OperatorSubscriber.Subscriber.next (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Subscriber.js:51:18)
+[kibana] |     at ReplaySubject._subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/ReplaySubject.js:54:24)
+[kibana] |     at ReplaySubject.Observable._trySubscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:41:25)
+[kibana] |     at ReplaySubject.Subject._trySubscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Subject.js:123:47)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:35:31
+[kibana] |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana] |     at ReplaySubject.Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/share.js:66:18
+[kibana] |     at OperatorSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana] |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana] |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/map.js:9:16
+[kibana] |     at OperatorSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana] |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana] |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/distinctUntilChanged.js:13:16
+[kibana] |     at OperatorSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana] |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana] |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/map.js:9:16
+[kibana] |     at OperatorSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana] |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana] |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/take.js:13:20
+[kibana] |     at OperatorSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana] |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana] |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/operators/throwIfEmpty.js:11:16
+[kibana] |     at SafeSubscriber.<anonymous> (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+[kibana] |     at Object.errorContext (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+[kibana] |     at Observable.subscribe (/usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+[kibana] |     at /usr/share/kibana/node_modules/rxjs/dist/cjs/internal/Observable.js:86:19
+[kibana] |     at new Promise (<anonymous>)
+
+ FATAL  Error: [config validation of [xpack.encryptedSavedObjects].encryptionKey]: value has length [31] but it must have a minimum length of [32].
+

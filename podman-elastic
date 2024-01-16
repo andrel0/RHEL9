@@ -493,3 +493,12 @@ ERROR: Unable to create an enrollment token. Elasticsearch node HTTP layer SSL c
           bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
           unzip config/certs/certs.zip -d config/certs;
 
+
+
+    ENCRYPTION_KEY=$(cat config/certs/elasticsearch/elasticsearch.key | grep "ENCRYPTED PRIVATE KEY" -A 500 | tail -n +2 | tr -d '\n' | base64);
+fi
+
+# Use the ENCRYPTION_KEY variable as needed
+echo "XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}"
+echo "XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}"
+echo "XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}"

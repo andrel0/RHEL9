@@ -98,6 +98,7 @@ services:
       - "9200:9200"
       - "9300:9300"
     group: "podman"
+
   kibana:
    container_name: kibana
    depends_on:

@@ -98,19 +98,20 @@ services:
       - "9200:9200"
       - "9300:9300"
     group: "podman"
-
-kibana:
+  kibana:
+   container_name: kibana
    depends_on:
      elasticsearch:
        condition: service_healthy
-   image: 
+   image: registry.connect.redhat.com/elastic/kibana:8.11.3-65c4b655
    labels:
      co.elastic.logs/module: kibana
    volumes:
      - /elasticsearch/single-node/data/certs/:/usr/share/elasticsearch/config/certs
-     - kibanadata:/usr/share/kibana/data
+     - /elasticsearch/single-node/kibana/:/usr/share/kibana/data
    ports:
      - ${KIBANA_PORT}:5601
+   group: "podman"
    environment:
      - SERVERNAME=kibana
      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200

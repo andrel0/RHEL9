@@ -495,7 +495,8 @@ ERROR: Unable to create an enrollment token. Elasticsearch node HTTP layer SSL c
 
 
 
-    ENCRYPTION_KEY=$(cat config/certs/elasticsearch/elasticsearch.key | grep "ENCRYPTED PRIVATE KEY" -A 500 | tail -n +2 | tr -d '\n' | base64);
+ENCRYPTION_KEY=$(awk '/BEGIN RSA PRIVATE KEY/{flag=1; next} /END RSA PRIVATE KEY/{flag=0} flag' config/certs/elasticsearch/elasticsearch.key | base64);
+
 fi
 
 # Use the ENCRYPTION_KEY variable as needed

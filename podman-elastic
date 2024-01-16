@@ -503,3 +503,10 @@ fi
 echo "XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}"
 echo "XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}"
 echo "XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}"
+
+
+grep denied /var/log/audit/audit.log
+type=AVC msg=audit(1705440041.589:269): avc:  denied  { read } for  pid=8761 comm="node" name="kibana" dev="dm-2" ino=8414950 scontext=system_u:system_r:container_t:s0:c651,c905 tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=dir permissive=0
+type=AVC msg=audit(1705440043.755:276): avc:  denied  { read } for  pid=8761 comm="node" name="kibana" dev="dm-2" ino=8414950 scontext=system_u:system_r:container_t:s0:c651,c905 tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=dir permissive=0
+type=AVC msg=audit(1705440043.888:277): avc:  denied  { read } for  pid=8761 comm="node" name="kibana" dev="dm-2" ino=8414950 scontext=system_u:system_r:container_t:s0:c651,c905 tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=dir permissive=0
+type=AVC msg=audit(1705440043.912:278): avc:  denied  { write } for  pid=8761 comm="node" name="kibana" dev="dm-2" ino=8414950 scontext=system_u:system_r:container_t:s0:c651,c905 tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=dir permissive=0

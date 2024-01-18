@@ -46,6 +46,12 @@ services:
         until curl -s --cacert config/certs/ca/ca.crt https://elasticsearch:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
         until curl -s -X POST --cacert config/certs/ca/ca.crt -u elastic:${ELASTIC_PASSWORD} -H "Content-Type: application/json" https://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "Create logstash_writer role";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://elasticsearch:9200/_security/role/logstash_writer -d "{\"cluster\":[\"manage_index_templates\",\"manage_ilm\",\"monitor\"],\"indices\":[{\"names\":[\"logs-*\",\".ds.*\",\"syslog-*\",\"unifi-*\"],\"privileges\":[\"write\",\"create\",\"create_index\",\"manage\",\"manage_ilm\"]}]}" | grep -q "^{\"role\":{\"created\":true}}"; do sleep 10; done;
+        echo "Create logstash_internal user";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://elasticsearch:9200/_security/user/logstash_internal -d "{\"password\":\"${LOGSTASH_INTERNAL_PASSWORD}\",\"roles\":[\"logstash_writer\"]}" | grep -q "^{\"created\":true}"; do sleep 10; done;
+        echo "Create Agent Policy";
+        until curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" kibana:5601/api/fleet/agent_policies?sys_monitoring=true -d "{\"name\":\"Agent policy 1\",\"namespace\":\"default\",\"monitoring_enabled\":[\"logs\",\"metrics\"]}" | grep -q "^{\"item\""; do sleep 10; done;
         echo "All done!";
       '
     healthcheck:

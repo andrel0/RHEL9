@@ -612,3 +612,13 @@ type=AVC msg=audit(1705440043.912:278): avc:  denied  { write } for  pid=8761 co
 [Logstash01] | [2024-01-19T03:56:25,205][INFO ][logstash.licensechecker.licensereader] Failed to perform request {:message=>"elasticsearch:9200 failed to respond", :exception=>Manticore::ClientProtocolException, :cause=>#<Java::OrgApacheHttp::NoHttpResponseException: elasticsearch:9200 failed to respond>}
 [Logstash01] | [2024-01-19T03:56:25,206][WARN ][logstash.licensechecker.licensereader] Attempted to resurrect connection to dead ES instance, but got an error {:url=>"http://elasticsearch:9200/", :exception=>LogStash::Outputs::ElasticSearch::HttpClient::Pool::HostUnreachableError, :message=>"Elasticsearch Unreachable: [http://elasticsearch:9200/][Manticore::ClientProtocolException] elasticsearch:9200 failed to respond"}
 
+output {
+  elasticsearch {
+    hosts => ["https://elasticsearch:9200"]
+    user => "elastic"
+    password => "WdeOwxFCeHsVkRjadasdsadtLJASDJADJ"
+    ssl => true
+    ssl_certificate_verification => true
+    cacert => '/usr/share/logstash/config/certs/ca/ca.crt'
+  }
+}

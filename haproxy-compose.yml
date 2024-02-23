@@ -51,7 +51,7 @@ frontend main
 # backend for Kibana
 #---------------------------------------------------------------------
 backend kibana_backend
-    server kibana kibana:5601 check
+    server kibana kibana:5601 ssl verify none check
 
 #---------------------------------------------------------------------
 # backend for statistics

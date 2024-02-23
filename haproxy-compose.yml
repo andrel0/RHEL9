@@ -1,0 +1,2 @@
+[WARNING] 053/201053 (1) : parsing [/etc/haproxy/haproxy.cfg:89] : 'server app1' : could not resolve address 'router.default.svc.cluster.local', disabling server.
+[WARNING] 053/201053 (1) : Server app/app1 is going DOWN for maintenance. 3 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.

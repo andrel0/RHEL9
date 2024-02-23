@@ -106,3 +106,6 @@ nameserver 10.89.2.1
 bash-4.2$ id
 uid=10001(haproxy) gid=998(haproxy) groups=998(haproxy),0(root)
 
+[WARNING] 053/224252 (1) : parsing [/etc/haproxy/haproxy.cfg:52] : 'server kibana' : could not resolve address 'kibana', disabling server.
+[WARNING] 053/224252 (1) : parsing [/etc/haproxy/haproxy.cfg:66] : 'server app1' : could not resolve address 'webserver1', disabling server.
+

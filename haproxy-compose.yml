@@ -1,2 +1,170 @@
 [WARNING] 053/201053 (1) : parsing [/etc/haproxy/haproxy.cfg:89] : 'server app1' : could not resolve address 'router.default.svc.cluster.local', disabling server.
 [WARNING] 053/201053 (1) : Server app/app1 is going DOWN for maintenance. 3 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+
+
+[root@dkr-elk-hc01 ~]# podman-compose -f /root/haproxy/haproxy-compose.yml up
+podman-compose version: 1.0.6
+['podman', '--version', '']
+using podman version: 4.6.1
+** excluding:  set()
+['podman', 'ps', '--filter', 'label=io.podman.compose.project=haproxy', '-a', '--format', '{{ index .Labels "io.podman.compose.config-hash"}}']
+recreating: ...
+** excluding:  set()
+podman stop -t 10 haproxy
+WARN[0010] StopSignal SIGTERM failed to stop container haproxy in 10 seconds, resorting to SIGKILL
+haproxy
+exit code: 0
+podman rm haproxy
+haproxy
+exit code: 0
+recreating: done
+
+
+['podman', 'network', 'exists', 'haproxy_lan_elastic']
+podman create --name=haproxy --label io.podman.compose.config-hash=146c047c29a09500fe8eeb1cf48b27cafc2669243355e888e840ab91d8a9311f --label io.podman.compose.project=haproxy --label io.podman.compose.version=1.0.6 --label PODMAN_SYSTEMD_UNIT=podman-compose@haproxy.service --label com.docker.compose.project=haproxy --label com.docker.compose.project.working_dir=/root/haproxy --label com.docker.compose.project.config_files=/root/haproxy/haproxy-compose.yml --label com.docker.compose.container-number=1 --label com.docker.compose.service=haproxy --dns 10.89.0.1 -e CERT_NAME=xxxxxxxxxxxxxx -e CERT_KEY=xxxxxxxxxxxxxxx --net haproxy_lan_elastic --network-alias haproxy,haproxy -p 80:80/tcp -p 443:443/tcp --hostname haproxy registry.connect.redhat.com/haproxytech/haproxy
+cbb0240e288a2506d7edf8dd02dbf032194ccc84959799764374d839d60b6f49
+exit code: 0
+podman start -a haproxy
+[WARNING] 053/213046 (1) : parsing [/etc/haproxy/haproxy.cfg:89] : 'server app1' : could not resolve address 'router.default.svc.cluster.local', disabling server.
+[WARNING] 053/213047 (1) : Server app/app1 is going DOWN for maintenance. 3 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+[WARNING] 053/213047 (1) : Server static/static1 is DOWN, reason: Layer4 connection problem, info: "Connection refused", check duration: 0ms. 1 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+[WARNING] 053/213047 (1) : Server static/static2 is DOWN, reason: Layer4 connection problem, info: "Connection refused", check duration: 0ms. 0 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+[ALERT] 053/213047 (1) : backend 'static' has no server available!
+[WARNING] 053/213047 (1) : Server app/app2 is DOWN, reason: Layer4 connection problem, info: "Connection refused", check duration: 0ms. 2 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+[WARNING] 053/213048 (1) : Server app/app3 is DOWN, reason: Layer4 connection problem, info: "Connection refused", check duration: 0ms. 1 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+[WARNING] 053/213048 (1) : Server app/app4 is DOWN, reason: Layer4 connection problem, info: "Connection refused", check duration: 0ms. 0 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+[ALERT] 053/213048 (1) : backend 'app' has no server available!
+
+
+
+[root@dkr-elk-hc01 ~]# podman exec -it haproxy /bin/bash
+bash-4.2$ cat /etc/haproxy/haproxy.cfg
+#---------------------------------------------------------------------
+# Example configuration for a possible web application.  See the
+# full configuration options online.
+#
+#   http://haproxy.1wt.eu/download/1.4/doc/configuration.txt
+#
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+# Global settings
+#---------------------------------------------------------------------
+global
+    # to have these messages end up in /var/log/haproxy.log you will
+    # need to:
+    #
+    # 1) configure syslog to accept network log events.  This is done
+    #    by adding the '-r' option to the SYSLOGD_OPTIONS in
+    #    /etc/sysconfig/syslog
+    #
+    # 2) configure local2 events to go to the /var/log/haproxy.log
+    #   file. A line like the following can be added to
+    #   /etc/sysconfig/syslog
+    #
+    #    local2.*                       /var/log/haproxy.log
+    #
+    log         127.0.0.1 local2
+
+    # unecessary since already in a container and runs w/ a non-root user
+    # chroot      /var/lib/haproxy
+    # user        haproxy
+    # group       haproxy
+    # daemon
+
+    pidfile     /var/lib/haproxy/haproxy.pid
+    maxconn     4000
+
+    # turn on stats unix socket
+    stats socket /var/lib/haproxy/stats
+
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
+    default-server          init-addr last,libc,none
+
+#---------------------------------------------------------------------
+# main frontend which proxys to the backends
+#---------------------------------------------------------------------
+frontend  main
+    bind *:8080
+    # bind *:8443 ssl # To be completed ....
+
+    acl url_static       path_beg       -i /static /images /javascript /stylesheets
+    acl url_static       path_end       -i .jpg .gif .png .css .js
+
+    use_backend static          if url_static
+    default_backend             app
+
+#---------------------------------------------------------------------
+# static backend for serving up images, stylesheets and such
+#---------------------------------------------------------------------
+backend static
+    balance     roundrobin
+    server      static1 127.0.0.1:4331 check
+    server      static2 127.0.0.1:4332 check
+
+#---------------------------------------------------------------------
+# round robin balancing between the various backends
+#---------------------------------------------------------------------
+backend app
+    balance roundrobin
+    server  app1 router.default.svc.cluster.local:80 check
+    server  app2 127.0.0.1:5002 check
+    server  app3 127.0.0.1:5003 check
+    server  app4 127.0.0.1:5004 check
+bash-4.2$ exit
+
+
+[root@dkr-elk-hc01 ~]# cat  /root/haproxy/haproxy-compose.yml
+version: '3'
+
+services:
+  haproxy:
+   container_name: haproxy
+   image: registry.connect.redhat.com/haproxytech/haproxy
+   hostname: haproxy
+   networks:
+     lan_elastic:
+       aliases:
+         - haproxy
+   dns:
+     - 10.89.0.1
+   ports:
+     - "80:80/tcp"
+     - "443:443/tcp"
+   group: "podman"
+   environment:
+     - CERT_NAME=xxxxxxxxxxxxxx
+     - CERT_KEY=xxxxxxxxxxxxxxx
+
+networks:
+  lan_elastic:
+    driver: bridge
+
+
+[root@dkr-elk-hc01 ~]# podman exec -it haproxy /bin/bash
+bash-4.2$ cat /etc/resolv.conf
+search dns.podman
+nameserver 10.89.2.1
+bash-4.2$ id
+uid=10001(haproxy) gid=998(haproxy) groups=998(haproxy),0(root)
+bash-4.2$ exit
